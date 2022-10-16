@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	PreallocateBufferSize = 1 << 20 // 1MiB
+	preallocateBufferSize = 1 << 20 // 1MiB
 )
 
 var panicStatusCodes = map[websocket.StatusCode]string{
@@ -222,7 +222,7 @@ func (g *Gateway) _onMessage(_ *wshelper.Connection, t websocket.MessageType, da
 
 func New(token string, shard uint16, totalShards uint16, options ...Option) *Gateway {
 	def := Options{
-		bufferSize: PreallocateBufferSize,
+		bufferSize: preallocateBufferSize,
 		identify: Identify{
 			Compress: true,
 			Token:    token,

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type Options struct {
+type options struct {
 	Store              cache.Store
 	Logger             golog.Logger
 	Shards             []uint16
@@ -22,47 +22,50 @@ type Options struct {
 	BlockUntilPrefetch bool
 }
 
-type Option func(v *Options)
+/*
+Option can be provided to client constructor to alter its settings.
+*/
+type Option func(v *options)
 
 func WithAPIOptions(opts ...api.Option) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.APIOptions = opts
 	}
 }
 
 func WithConnectionTimeout(timeout time.Duration) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.Timeout = timeout
 	}
 }
 
 func WithStore(store cache.Store) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.Store = store
 	}
 }
 
 func WithDisabledPrefetchBlock() Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.BlockUntilPrefetch = false
 	}
 }
 
-func WithGatewayOpts(options ...gateway.Option) Option {
-	return func(v *Options) {
-		v.GatewayOptions = append(v.GatewayOptions, options...)
+func WithGatewayOpts(opts ...gateway.Option) Option {
+	return func(v *options) {
+		v.GatewayOptions = append(v.GatewayOptions, opts...)
 	}
 }
 
 func WithShardCount(count uint16) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.ShardCount = count
 		v.AutoSharding = false
 	}
 }
 
 func WithShards(shards []uint16) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.Shards = shards
 		v.AutoSharding = false
 	}
@@ -73,13 +76,13 @@ func WithIntents(intents intents.Intent) Option {
 }
 
 func WithDebug(enabled bool) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.Logger.SetLevel(golog.LevelDebug)
 	}
 }
 
 func WithLogger(logger golog.Logger) Option {
-	return func(v *Options) {
+	return func(v *options) {
 		v.Logger = logger
 	}
 }

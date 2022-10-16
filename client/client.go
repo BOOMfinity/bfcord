@@ -44,7 +44,7 @@ type client struct {
 	*api.Client
 	manager *EventManager
 	limiter *rate.Limiter
-	config  *Options
+	config  *options
 	logger  golog.Logger
 	token   string
 	shards  []*gateway.Shard
@@ -256,8 +256,9 @@ func (v *client) Log() golog.Logger {
 	return v.logger
 }
 
+// New creates a client with default settings	 (automatic sharding, default cache). To override these settings, use Options
 func New(token string, opt ...Option) (Client, error) {
-	def := &Options{AutoSharding: true, Logger: golog.New("bfcord"), BlockUntilPrefetch: true, Timeout: 45 * time.Second}
+	def := &options{AutoSharding: true, Logger: golog.New("bfcord"), BlockUntilPrefetch: true, Timeout: 45 * time.Second, Store: cache.NewDefaultStore()}
 	gtwLog := def.Logger.Module("gateway")
 	def.GatewayOptions = append(def.GatewayOptions, gateway.WithLogger(gtwLog), gateway.WithApiClient(api.NewClient(token, api.WithLogger(gtwLog.Module("api")))))
 	for i := range opt {
@@ -292,14 +293,6 @@ func New(token string, opt ...Option) (Client, error) {
 		c.store = def.Store
 	}
 	return c, nil
-}
-
-func NewWithStore(token string, opt ...Option) (Client, error) {
-	return NewWithCustomStore(token, cache.NewDefaultStore(), opt...)
-}
-
-func NewWithCustomStore(token string, store cache.Store, opt ...Option) (Client, error) {
-	return New(token, append([]Option{WithStore(store)}, opt...)...)
 }
 
 type presenceSet struct {

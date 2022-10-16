@@ -15,7 +15,6 @@ require (
 	go.uber.org/atomic v1.10.0
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 	golang.org/x/exp v0.0.0-20221012211006-4de253d81b95
-	golang.org/x/tools v0.1.12
 )
 
 require (
@@ -24,6 +23,5 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
 )
