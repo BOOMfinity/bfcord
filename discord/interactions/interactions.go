@@ -245,12 +245,12 @@ func (v *interactionBuilder[B]) Execute() (err error) {
 
 type FollowUpCreateBuilder interface {
 	discord.ExpandableWebhookExecuteBuilder[FollowUpCreateBuilder]
-	Execute() (msg *FollowUpMessage, err error)
+	Execute() (msg FollowUpMessage, err error)
 }
 
 type FollowUpUpdateBuilder interface {
 	discord.BaseMessageBuilder[FollowUpUpdateBuilder]
-	Execute() (msg *FollowUpMessage, err error)
+	Execute() (msg FollowUpMessage, err error)
 }
 
 type OriginalUpdateBuilder interface {
@@ -265,11 +265,12 @@ type originalUpdateBuilder struct {
 
 func (v *originalUpdateBuilder) Execute() (err error) {
 	msg, err := http.LowLevel().Message(fasthttp.MethodPatch, fmt.Sprintf(api.FullApiUrl+"/webhooks/%v/%v/messages/@original", v.i.ApplicationID, v.i.Token), v.Raw())
-	if msg != nil {
-		msg.Patch()
-		v.i.Message = *msg
+	if err != nil {
+		return
 	}
-	return err
+	msg.Patch()
+	v.i.Message = msg
+	return
 }
 
 type OriginalCustomBuilder interface {

@@ -48,13 +48,14 @@ func (m MessageQuery) StartThread(name string) discord.CreateThreadChannelBuilde
 	return builders.NewCreateThreadChannelBuilder(m.channel, m.id, name)
 }
 
-func (m MessageQuery) Get() (msg *discord.Message, err error) {
+func (m MessageQuery) Get() (msg discord.Message, err error) {
 	req := m.client.New(true)
 	req.SetRequestURI(fmt.Sprintf(FullApiUrl+"/channels/%v/messages/%v", m.channel, m.id))
 	err = m.client.DoResult(req, &msg)
-	if msg != nil {
-		msg.Patch()
+	if err != nil {
+		return
 	}
+	msg.Patch()
 	return
 }
 

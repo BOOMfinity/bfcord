@@ -1,6 +1,7 @@
 package builders
 
 import (
+	"fmt"
 	"github.com/BOOMfinity/bfcord/discord"
 	"github.com/BOOMfinity/bfcord/discord/permissions"
 	"github.com/andersfylling/snowflake/v5"
@@ -70,7 +71,7 @@ type CreateThreadBuilder[B any] struct {
 	Message snowflake.ID
 }
 
-func (c *CreateThreadBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch *discord.Channel, err error) {
+func (c *CreateThreadBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch discord.Channel, err error) {
 	return api.LowLevel().Reason(strings.Join(reason, " ")).StartThread(c.ID, c.Message, c.Data)
 }
 
@@ -141,7 +142,7 @@ func (c *ChannelBuilder[B]) Invitable(invitable bool) B {
 	return c.B
 }
 
-func (c *ChannelBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch *discord.Channel, err error) {
+func (c *ChannelBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch discord.Channel, err error) {
 	ll := api.LowLevel()
 	if len(reason) > 0 {
 		ll = ll.Reason(strings.Join(reason, " "))
@@ -162,11 +163,13 @@ func (c *ChannelBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (
 	if c.Data.Position != nil {
 		channel, _err := api.Channel(c.ID).Get()
 		if _err != nil {
-			return nil, _err
+			err = fmt.Errorf("could not fetch channel: %w", _err)
+			return
 		}
 		channels, _err := api.Guild(channel.GuildID).NoCache().Channels()
 		if _err != nil {
-			return nil, _err
+			err = fmt.Errorf("could not fetch guild channels: %w", _err)
+			return
 		}
 		bl := discord.NewGuildChannelPositionsBuilder(channels)
 		bl.Pos(c.ID, *c.Data.Position)

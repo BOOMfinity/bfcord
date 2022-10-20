@@ -21,22 +21,24 @@ type lowLevelQuery struct {
 	emptyOptions[discord.LowLevelClientQuery]
 }
 
-func (v lowLevelQuery) CreateForumMessage(id snowflake.ID, _data discord.ForumMessageCreate) (d *discord.ChannelWithMessage, err error) {
+func (v lowLevelQuery) CreateForumMessage(id snowflake.ID, _data discord.ForumMessageCreate) (d discord.ChannelWithMessage, err error) {
 	req := v.client.New(true)
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/threads", FullApiUrl, id))
 	data := _data.Message
 	if err != nil {
-		return nil, err
+		return
 	}
 	if data.Files != nil && len(*data.Files) > 0 {
 		if _err := v.prepareAttachments(req, data); _err != nil {
-			return nil, fmt.Errorf("failed to prepare attachments: %w", _err)
+			err = fmt.Errorf("failed to prepare attachments: %w", _err)
+			return
 		}
 	} else {
-		rawData, err := json.Marshal(_data)
-		if err != nil {
-			return nil, err
+		rawData, _err := json.Marshal(_data)
+		if _err != nil {
+			err = fmt.Errorf("failed to marshal json data: %w", _err)
+			return
 		}
 		fmt.Println(string(rawData))
 		req.SetBody(rawData)
@@ -45,13 +47,11 @@ func (v lowLevelQuery) CreateForumMessage(id snowflake.ID, _data discord.ForumMe
 		req.Header.Set("X-Audit-Log-Reason", v.reason)
 	}
 	err = v.client.DoResult(req, &d)
-	if d != nil {
-		d.Message.Patch()
-	}
+	d.Message.Patch()
 	return
 }
 
-func (v lowLevelQuery) CreateOrUpdate(guild, role snowflake.ID, data discord.RoleCreate) (r *discord.Role, err error) {
+func (v lowLevelQuery) CreateOrUpdate(guild, role snowflake.ID, data discord.RoleCreate) (r discord.Role, err error) {
 	req := v.client.New(true)
 	if role.Valid() {
 		req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/roles/%v", FullApiUrl, guild, role))
@@ -62,20 +62,21 @@ func (v lowLevelQuery) CreateOrUpdate(guild, role snowflake.ID, data discord.Rol
 	}
 	json, err := json.Marshal(data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal json body: %w", err)
+		err = fmt.Errorf("failed to marshal json body: %w", err)
+		return
 	}
 	req.SetBody(json)
 	err = v.client.DoResult(req, &r)
 	return
 }
 
-func (v lowLevelQuery) UpdateGuild(guild snowflake.ID, data discord.GuildUpdate) (g *discord.Guild, err error) {
+func (v lowLevelQuery) UpdateGuild(guild snowflake.ID, data discord.GuildUpdate) (g discord.Guild, err error) {
 	req := v.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v", FullApiUrl, guild))
 	req.Header.SetMethod(fasthttp.MethodPatch)
 	raw, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return
 	}
 	req.SetBody(raw)
 	if v.reason != "" {
@@ -84,7 +85,7 @@ func (v lowLevelQuery) UpdateGuild(guild snowflake.ID, data discord.GuildUpdate)
 	return g, v.client.DoResult(req, &g)
 }
 
-func (v lowLevelQuery) StartThread(channel snowflake.ID, message snowflake.ID, data discord.ThreadCreate) (ch *discord.Channel, err error) {
+func (v lowLevelQuery) StartThread(channel snowflake.ID, message snowflake.ID, data discord.ThreadCreate) (ch discord.Channel, err error) {
 	req := v.client.New(true)
 	if message.Valid() {
 		req.SetRequestURI(fmt.Sprintf("%v/channels/%v/messages/%v/threads", FullApiUrl, channel, message))
@@ -94,7 +95,7 @@ func (v lowLevelQuery) StartThread(channel snowflake.ID, message snowflake.ID, d
 	req.Header.SetMethod(fasthttp.MethodPost)
 	raw, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return
 	}
 	req.SetBody(raw)
 	if v.reason != "" {
@@ -104,7 +105,7 @@ func (v lowLevelQuery) StartThread(channel snowflake.ID, message snowflake.ID, d
 	return
 }
 
-func (v lowLevelQuery) UpdateChannel(id snowflake.ID, data discord.ChannelUpdate) (ch *discord.Channel, err error) {
+func (v lowLevelQuery) UpdateChannel(id snowflake.ID, data discord.ChannelUpdate) (ch discord.Channel, err error) {
 	req := v.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v", FullApiUrl, id))
 	req.Header.SetMethod(fasthttp.MethodPatch)
@@ -120,7 +121,7 @@ func (v lowLevelQuery) UpdateChannel(id snowflake.ID, data discord.ChannelUpdate
 	return
 }
 
-func (v lowLevelQuery) ExecuteWebhook(id snowflake.ID, token string, data discord.WebhookExecute, wait bool, thread snowflake.ID) (msg *discord.Message, err error) {
+func (v lowLevelQuery) ExecuteWebhook(id snowflake.ID, token string, data discord.WebhookExecute, wait bool, thread snowflake.ID) (msg discord.Message, err error) {
 	params := url.Values{}
 	params.Add("wait", strconv.FormatBool(wait))
 	if thread.Valid() {
@@ -129,7 +130,7 @@ func (v lowLevelQuery) ExecuteWebhook(id snowflake.ID, token string, data discor
 	return v.Message(fasthttp.MethodPost, fmt.Sprintf("%v/webhooks/%v/%v?%v", FullApiUrl, id, token, params.Encode()), data)
 }
 
-func (v lowLevelQuery) UpdateWebhookMessage(id snowflake.ID, token string, message snowflake.ID, data discord.MessageCreate, thread snowflake.ID) (msg *discord.Message, err error) {
+func (v lowLevelQuery) UpdateWebhookMessage(id snowflake.ID, token string, message snowflake.ID, data discord.MessageCreate, thread snowflake.ID) (msg discord.Message, err error) {
 	urlx := fmt.Sprintf("%v/webhooks/%v/%v/messages/%v", FullApiUrl, id, token, message)
 	if thread.Valid() {
 		params := url.Values{}
@@ -139,7 +140,7 @@ func (v lowLevelQuery) UpdateWebhookMessage(id snowflake.ID, token string, messa
 	return v.Message(fasthttp.MethodPatch, urlx, data)
 }
 
-func (v lowLevelQuery) UpdateMessage(channel snowflake.ID, message snowflake.ID, data discord.MessageCreate) (msg *discord.Message, err error) {
+func (v lowLevelQuery) UpdateMessage(channel snowflake.ID, message snowflake.ID, data discord.MessageCreate) (msg discord.Message, err error) {
 	return v.Message(fasthttp.MethodPatch, fmt.Sprintf("%v/channels/%v/messages/%v", FullApiUrl, channel, message), data)
 }
 
@@ -229,7 +230,7 @@ func (v lowLevelQuery) prepareAttachments(req *fasthttp.Request, data discord.Me
 	return nil
 }
 
-func (v lowLevelQuery) Message(method string, url string, _data any) (msg *discord.Message, err error) {
+func (v lowLevelQuery) Message(method string, url string, _data any) (msg discord.Message, err error) {
 	req := v.client.New(true)
 	req.SetRequestURI(url)
 	req.Header.SetMethod(method)
@@ -241,16 +242,18 @@ func (v lowLevelQuery) Message(method string, url string, _data any) (msg *disco
 		data = _d.MessageCreate
 	}
 	if err != nil {
-		return nil, err
+		return
 	}
 	if data.Files != nil && len(*data.Files) > 0 {
 		if _err := v.prepareAttachments(req, data); _err != nil {
-			return nil, fmt.Errorf("failed to prepare attachments: %w", _err)
+			err = fmt.Errorf("failed to prepare attachments: %w", _err)
+			return
 		}
 	} else {
-		rawData, err := json.Marshal(_data)
-		if err != nil {
-			return nil, err
+		rawData, _err := json.Marshal(_data)
+		if _err != nil {
+			err = fmt.Errorf("failed to marshal json data: %w", _err)
+			return
 		}
 		req.SetBody(rawData)
 	}
@@ -258,23 +261,21 @@ func (v lowLevelQuery) Message(method string, url string, _data any) (msg *disco
 		req.Header.Set("X-Audit-Log-Reason", v.reason)
 	}
 	err = v.client.DoResult(req, &msg)
-	if msg != nil {
-		msg.Patch()
-	}
+	msg.Patch()
 	return
 }
 
-func (v lowLevelQuery) CreateMessage(channel snowflake.ID, data discord.MessageCreate) (msg *discord.Message, err error) {
+func (v lowLevelQuery) CreateMessage(channel snowflake.ID, data discord.MessageCreate) (msg discord.Message, err error) {
 	return v.Message(fasthttp.MethodPost, fmt.Sprintf("%v/channels/%v/messages", FullApiUrl, channel), data)
 }
 
-func (v lowLevelQuery) CreateGuildChannel(guild snowflake.ID, data discord.ChannelUpdate) (ch *discord.Channel, err error) {
+func (v lowLevelQuery) CreateGuildChannel(guild snowflake.ID, data discord.ChannelUpdate) (ch discord.Channel, err error) {
 	req := v.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/channels", FullApiUrl, guild))
 	req.Header.SetMethod(fasthttp.MethodPost)
 	raw, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return
 	}
 	req.SetBody(raw)
 	if v.reason != "" {
@@ -283,13 +284,13 @@ func (v lowLevelQuery) CreateGuildChannel(guild snowflake.ID, data discord.Chann
 	return ch, v.client.DoResult(req, &ch)
 }
 
-func (v lowLevelQuery) UpdateGuildMember(guild snowflake.ID, member snowflake.ID, data discord.MemberUpdate) (m *discord.MemberWithUser, err error) {
+func (v lowLevelQuery) UpdateGuildMember(guild snowflake.ID, member snowflake.ID, data discord.MemberUpdate) (m discord.MemberWithUser, err error) {
 	req := v.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/members/%v", FullApiUrl, guild, member))
 	req.Header.SetMethod(fasthttp.MethodPatch)
 	raw, err := json.Marshal(data)
 	if err != nil {
-		return nil, err
+		return
 	}
 	req.SetBody(raw)
 	if v.reason != "" {
@@ -297,7 +298,7 @@ func (v lowLevelQuery) UpdateGuildMember(guild snowflake.ID, member snowflake.ID
 	}
 	err = v.client.DoResult(req, &m)
 	if err != nil {
-		return nil, err
+		return
 	}
 	m.GuildID = guild
 	m.UserID = member

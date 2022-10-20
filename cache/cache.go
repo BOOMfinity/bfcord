@@ -11,7 +11,7 @@ import (
 var _ = (Store)(&DefaultStore{})
 
 type Store interface {
-	Guilds() SafeStore[discord.BaseGuild]
+	Guilds() SafeStore[discord.Guild]
 	Members() SafeStore[SafeStore[discord.Member]]
 	Channels() SafeStore[SafeStore[discord.Channel]]
 	Reactions() SafeStore[SafeStoreCustom[string, discord.MessageReaction]]
@@ -52,7 +52,7 @@ func newSafeStoreCustom[K comparable, V any]() SafeStoreCustom[K, V] {
 func NewDefaultStore() *DefaultStore {
 	store := new(DefaultStore)
 	store.users = NewSafeMap[snowflake.ID, discord.User](0)
-	store.guilds = NewSafeMap[snowflake.ID, discord.BaseGuild](0)
+	store.guilds = NewSafeMap[snowflake.ID, discord.Guild](0)
 	store.private = NewSafeMap[snowflake.ID, discord.Channel](0)
 	store.reactions = NewSafeMapWithInitializer[snowflake.ID, SafeStoreCustom[string, discord.MessageReaction]](0, newSafeStoreCustom[string, discord.MessageReaction])
 	store.members = NewSafeMapWithInitializer[snowflake.ID, SafeStore[discord.Member]](0, newSafeStore[discord.Member])
@@ -71,7 +71,7 @@ func NewDefaultStore() *DefaultStore {
 
 type DefaultStore struct {
 	users       SafeStore[discord.User]
-	guilds      SafeStore[discord.BaseGuild]
+	guilds      SafeStore[discord.Guild]
 	private     SafeStore[discord.Channel]
 	reactions   SafeStore[SafeStoreCustom[string, discord.MessageReaction]]
 	roles       SafeStore[SafeStore[discord.Role]]
@@ -105,7 +105,7 @@ func (d *DefaultStore) Private() SafeStore[discord.Channel] {
 	return d.private
 }
 
-func (d *DefaultStore) Guilds() SafeStore[discord.BaseGuild] {
+func (d *DefaultStore) Guilds() SafeStore[discord.Guild] {
 	return d.guilds
 }
 

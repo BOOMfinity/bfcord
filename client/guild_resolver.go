@@ -23,15 +23,6 @@ func (gr guildResolver) VoiceStates() (states discord.Slice[discord.VoiceState],
 			return
 		}
 	}
-	if !gr.ignoreAPI {
-		states, err = gr.GuildQuery.VoiceStates()
-		if gr.bot.Store() != nil {
-			for i := range states {
-				gr.bot.Store().VoiceStates().UnsafeGet(gr.ID()).Set(states[i].UserID, states[i])
-			}
-		}
-		return
-	}
 	return nil, errs.ItemNotFound
 }
 
@@ -55,37 +46,22 @@ func (gr guildResolver) Members(limit int, after snowflake.ID) (members []discor
 	return
 }
 
-func (gr guildResolver) Get() (*discord.Guild, error) {
+func (gr guildResolver) Get() (discord.Guild, error) {
 	if !gr.ignoreCache && gr.bot.Store() != nil {
 		g, ok := gr.bot.Store().Guilds().Get(gr.ID())
 		if ok {
-			gr.bot.Log().Debug().Any(gr.ID()).Send("Guild was returned from cache")
-			return &discord.Guild{
-				BaseGuild: g,
-			}, nil
+			return g, nil
 		}
 	}
 	if !gr.ignoreAPI {
 		guild, err := gr.GuildQuery.Get()
 		if err != nil {
-			return nil, err
+			return discord.Guild{}, err
 		}
 		if gr.bot.Store() != nil {
-			gr.bot.Store().Guilds().Set(guild.ID, guild.BaseGuild)
-			for i := range guild.Members {
-				gr.bot.Store().Members().UnsafeGet(guild.ID).Set(guild.Members[i].UserID, guild.Members[i].Member)
-				gr.bot.Store().Users().Set(guild.Members[i].UserID, guild.Members[i].User)
-			}
-			for i := range guild.Channels {
-				gr.bot.Store().Channels().UnsafeGet(guild.ID).Set(guild.Channels[i].ID, guild.Channels[i])
-			}
-			for i := range guild.Presences {
-				gr.bot.Store().Presences().UnsafeGet(guild.ID).Set(guild.Presences[i].UserID, guild.Presences[i].BasePresence)
-			}
-			gr.bot.Store().Users().Set(guild.OwnerID, guild.Owner)
+			gr.bot.Store().Guilds().Set(guild.ID, guild)
 		}
-		gr.bot.Log().Debug().Any(gr.ID()).Send("Guild was returned from API")
 		return guild, nil
 	}
-	return nil, errs.ItemNotFound
+	return discord.Guild{}, errs.ItemNotFound
 }

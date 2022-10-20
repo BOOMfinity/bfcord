@@ -5,52 +5,45 @@ import (
 	"github.com/BOOMfinity/bfcord/internal/timeconv"
 	"github.com/BOOMfinity/go-utils/nullable"
 	"github.com/andersfylling/snowflake/v5"
-	"golang.org/x/exp/slices"
 )
 
-// Guild
-//
-// Reference: https://discord.com/developers/docs/resources/guild#guild-object-guild-structure
+type GuildWithData struct {
+	Members         []MemberWithUser      `json:"members"`
+	Channels        []Channel             `json:"channels"`
+	Threads         []Channel             `json:"threads"`
+	Presences       []Presence            `json:"presences"`
+	VoiceStates     []VoiceState          `json:"voice_states"`
+	StageInstances  []StageInstance       `json:"stage_instances"`
+	ScheduledEvents []GuildScheduledEvent `json:"guild_scheduled_events"`
+	Owner           User                  `json:"owner"`
+	Guild
+}
+
+func (g *GuildWithData) Patch() {
+	g.Guild.Patch()
+	for i := range g.Members {
+		g.Members[i].UserID = g.Members[i].User.ID
+		g.Members[i].GuildID = g.ID
+	}
+	for i := range g.Channels {
+		g.Channels[i].GuildID = g.ID
+	}
+	for i := range g.Threads {
+		g.Threads[i].GuildID = g.ID
+	}
+	for i := range g.Presences {
+		g.Presences[i].UserID = g.Presences[i].User.ID
+		g.Presences[i].GuildID = g.ID
+	}
+	for i := range g.StageInstances {
+		g.StageInstances[i].GuildID = g.ID
+	}
+	for i := range g.ScheduledEvents {
+		g.ScheduledEvents[i].GuildID = g.ID
+	}
+}
+
 type Guild struct {
-	Members     []MemberWithUser `json:"members"`
-	Channels    []Channel        `json:"channels"`
-	Threads     []Channel        `json:"threads"`
-	Presences   []Presence       `json:"presences"`
-	VoiceStates []VoiceState     `json:"voice_states"`
-	Owner       User             `json:"owner"`
-	BaseGuild
-}
-
-// The same as GuildQuery.Members
-func (v *Guild) FetchMembers(api ClientQuery, limit int, after snowflake.ID) (err error) {
-	if limit == -1 && !after.Valid() {
-		v.Members = v.Members[:0]
-	}
-	v.Members, err = api.Guild(v.ID).Members(limit, after)
-	if err != nil {
-		return
-	}
-	v.Members = slices.CompactFunc(v.Members, func(v, v2 MemberWithUser) bool {
-		return v2.UserID == v.UserID
-	})
-	return nil
-}
-
-func (v Guild) Patch() {
-	v.BaseGuild.Patch()
-	for i := range v.Members {
-		v.Members[i].GuildID = v.ID
-		v.Members[i].UserID = v.Members[i].User.ID
-	}
-	for i := range v.Presences {
-		v.Presences[i].UserID = v.Presences[i].User.ID
-	}
-	for i := range v.Channels {
-		v.Channels[i].GuildID = v.ID
-	}
-}
-
-type BaseGuild struct {
 	JoinedAt                    timeconv.Timestamp         `json:"joined_at"`
 	Banner                      string                     `json:"banner"`
 	Name                        string                     `json:"name"`
@@ -65,7 +58,6 @@ type BaseGuild struct {
 	Features                    []string                   `json:"features"`
 	Stickers                    []GuildSticker             `json:"stickers"`
 	Roles                       []Role                     `json:"roles"`
-	StageInstances              []StageInstance            `json:"stage_instances"`
 	Emojis                      []Emoji                    `json:"emojis"`
 	AFKTimeout                  timeconv.Seconds           `json:"afk_timeout"`
 	MFALevel                    int                        `json:"mfa_level"`
@@ -94,24 +86,23 @@ type BaseGuild struct {
 	Large                       bool                       `json:"large"`
 }
 
-func (v BaseGuild) MemberPermissions(api ClientQuery, member snowflake.ID) (perm permissions.Permission, err error) {
+func (v Guild) Patch() {
+	for i := range v.Emojis {
+		v.Emojis[i].GuildID = v.ID
+	}
+	for i := range v.Roles {
+		v.Roles[i].GuildID = v.ID
+	}
+	for i := range v.Stickers {
+		v.Stickers[i].GuildID = v.ID
+	}
+}
+
+func (v Guild) MemberPermissions(api ClientQuery, member snowflake.ID) (perm permissions.Permission, err error) {
 	if v.OwnerID == member {
 		return permissions.All, nil
 	}
 	return api.Guild(v.ID).Member(member).Permissions()
-}
-
-func (v BaseGuild) Patch() {
-	for i := range v.Roles {
-		v.Roles[i].GuildID = v.ID
-	}
-	for i := range v.Emojis {
-		v.Emojis[i].GuildID = v.ID
-	}
-}
-
-func (v *BaseGuild) Merge(src BaseGuild) {
-	v.Name = src.Name
 }
 
 type GuildUpdate struct {

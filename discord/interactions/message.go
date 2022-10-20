@@ -7,7 +7,7 @@ import (
 )
 
 type FollowUpMessage struct {
-	*discord.Message
+	discord.Message
 	i *Interaction
 }
 
@@ -29,12 +29,12 @@ type followUpCreateBuilder struct {
 	i *Interaction
 }
 
-func (v followUpCreateBuilder) Execute() (msg *FollowUpMessage, err error) {
+func (v followUpCreateBuilder) Execute() (msg FollowUpMessage, err error) {
 	m, err := http.LowLevel().ExecuteWebhook(v.i.ApplicationID, v.i.Token, discord.WebhookExecute{MessageCreate: v.Raw()}, true, 0)
 	if err != nil {
 		return
 	}
-	return &FollowUpMessage{i: v.i, Message: m}, nil
+	return FollowUpMessage{i: v.i, Message: m}, nil
 }
 
 type followUpUpdateBuilder struct {
@@ -44,10 +44,10 @@ type followUpUpdateBuilder struct {
 	id snowflake.ID
 }
 
-func (v followUpUpdateBuilder) Execute() (msg *FollowUpMessage, err error) {
+func (v followUpUpdateBuilder) Execute() (msg FollowUpMessage, err error) {
 	m, err := http.LowLevel().UpdateWebhookMessage(v.i.ApplicationID, v.i.Token, v.id, v.Raw(), 0)
 	if err != nil {
 		return
 	}
-	return &FollowUpMessage{i: v.i, Message: m}, nil
+	return FollowUpMessage{i: v.i, Message: m}, nil
 }

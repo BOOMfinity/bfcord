@@ -13,7 +13,7 @@ type InviteWithMeta struct {
 
 type Invite struct {
 	ExpiresAt           timeconv.Timestamp   `json:"expires_at,omitempty"`
-	Guild               *BaseGuild           `json:"guild,omitempty"`
+	Guild               *Guild               `json:"guild,omitempty"`
 	Inviter             *User                `json:"inviter,omitempty"`
 	GuildScheduledEvent *GuildScheduledEvent `json:"guild_scheduled_event,omitempty"`
 	TargetUser          *User                `json:"target_user,omitempty"`

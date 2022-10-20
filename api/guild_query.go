@@ -42,11 +42,7 @@ func (v GuildQuery) CreateRole() discord.RoleBuilder {
 }
 
 func (v GuildQuery) VoiceStates() (states discord.Slice[discord.VoiceState], err error) {
-	guild, err := v.Get()
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch guild: %w", err)
-	}
-	states = guild.VoiceStates
+	// TODO: Discord does not send voice states anywhere except guild_create event
 	return
 }
 
@@ -95,11 +91,11 @@ func (v GuildQuery) Members(limit int, after snowflake.ID) (members []discord.Me
 	return
 }
 
-func (v GuildQuery) Get() (guild *discord.Guild, err error) {
+func (v GuildQuery) Get() (guild discord.Guild, err error) {
 	req := v.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v", FullApiUrl, v.guild))
 	err = v.api.DoResult(req, &guild)
-	if err != nil || guild == nil {
+	if err != nil {
 		return
 	}
 	guild.Patch()

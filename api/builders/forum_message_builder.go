@@ -12,7 +12,7 @@ type ForumMessageBuilder[B any] struct {
 	forum discord.ForumMessageCreate
 }
 
-func (f *ForumMessageBuilder[B]) Execute(api discord.ClientQuery) (*discord.ChannelWithMessage, error) {
+func (f *ForumMessageBuilder[B]) Execute(api discord.ClientQuery) (discord.ChannelWithMessage, error) {
 	f.forum.Message = f.Create.MessageCreate
 	return api.LowLevel().CreateForumMessage(f.ChannelID, f.forum)
 }

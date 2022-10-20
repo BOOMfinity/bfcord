@@ -102,14 +102,15 @@ func (v *client) handle(data *gateway.Payload) {
 			_h(v, shard, ev, old)
 		})
 	case events.GuildCreate:
-		ev, err := gateway.PayloadTo[discord.Guild](data)
+		ev, err := gateway.PayloadTo[discord.GuildWithData](data)
 		if err != nil {
 			v.Log().Error().Send("failed unmarshalling %v event: %v", data.Event, err.Error())
 			return
 		}
 		ev.Patch()
 		if v.Store() != nil {
-			v.Store().Guilds().Set(ev.ID, ev.BaseGuild)
+			v.Store().Guilds().Set(ev.ID, ev.Guild)
+			v.Store().Users().Set(ev.Owner.ID, ev.Owner)
 			for i := range ev.Presences {
 				user := ev.Presences[i].User
 				if !user.IsPartial() {
@@ -307,13 +308,13 @@ func (v *client) handle(data *gateway.Payload) {
 			_h(v, shard, ev)
 		})
 	case events.GuildUpdate:
-		ev, err := gateway.PayloadTo[discord.BaseGuild](data)
+		ev, err := gateway.PayloadTo[discord.Guild](data)
 		if err != nil {
-			v.Log().Error().Send("failed unmarshalling %v event: %v", data.Event, err.Error())
+			v.Log().Error().Send("failed unmarshalling %v event: %s", data.Event, err)
 			return
 		}
 		ev.Patch()
-		var old *discord.BaseGuild
+		var old *discord.Guild
 		if v.Store() != nil {
 			if _g, ok := v.Store().Guilds().Get(ev.ID); ok {
 				old = &_g
@@ -329,7 +330,7 @@ func (v *client) handle(data *gateway.Payload) {
 			v.Log().Error().Send("failed unmarshalling %v event: %v", data.Event, err.Error())
 			return
 		}
-		var old *discord.BaseGuild
+		var old *discord.Guild
 		if v.Store() != nil {
 			if _g, ok := v.Store().Guilds().Get(ev.ID); ok {
 				old = &_g
@@ -338,6 +339,7 @@ func (v *client) handle(data *gateway.Payload) {
 			v.Store().Channels().Delete(ev.ID)
 			v.Store().Members().Delete(ev.ID)
 			v.Store().Presences().Delete(ev.ID)
+			v.Store().VoiceStates().Delete(ev.ID)
 		}
 		Execute(v.manager, func(_h GuildDeleteEvent) {
 			_h(v, shard, ev, old)

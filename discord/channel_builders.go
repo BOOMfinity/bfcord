@@ -6,7 +6,7 @@ import (
 )
 
 type CreateThreadChannelBuilder interface {
-	BuilderExecutorReason[*Channel]
+	BuilderExecutorReason[Channel]
 	ExpandableCreateThreadChannelBuilder[CreateThreadChannelBuilder]
 }
 
@@ -20,7 +20,7 @@ type ExpandableCreateThreadChannelBuilder[B any] interface {
 }
 
 type UpdateThreadChannelBuilder interface {
-	BuilderExecutorReason[*Channel]
+	BuilderExecutorReason[Channel]
 	ExpandableUpdateThreadChannelBuilder[UpdateThreadChannelBuilder]
 }
 
@@ -31,7 +31,7 @@ type ExpandableUpdateThreadChannelBuilder[B any] interface {
 }
 
 type GuildChannelBuilder interface {
-	BuilderExecutorReason[*Channel]
+	BuilderExecutorReason[Channel]
 	ExpandableGuildChannelBuilder[GuildChannelBuilder]
 }
 
@@ -49,7 +49,7 @@ type ExpandableGuildChannelBuilder[B any] interface {
 }
 
 type UpdateGuildChannelBuilder interface {
-	BuilderExecutorReason[*Channel]
+	BuilderExecutorReason[Channel]
 	ExpandableUpdateGuildChannelBuilder[UpdateGuildChannelBuilder]
 }
 

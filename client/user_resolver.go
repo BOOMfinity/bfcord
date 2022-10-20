@@ -34,13 +34,11 @@ type userResolver struct {
 	resolverOptions[discord.UserQuery]
 }
 
-func (u userResolver) Get() (user *discord.User, err error) {
+func (u userResolver) Get() (user discord.User, err error) {
 	if !u.ignoreCache && u.bot.Store() != nil {
 		cache, ok := u.bot.Store().Users().Get(u.ID())
 		if ok {
-			user = &cache
-			u.bot.Log().Debug().Any(u.ID()).Send("User was returned from cache")
-			return
+			return cache, nil
 		}
 	}
 	if !u.ignoreAPI {
@@ -48,13 +46,12 @@ func (u userResolver) Get() (user *discord.User, err error) {
 		if err != nil {
 			return
 		}
-		if u.bot.Store() != nil && user != nil {
-			u.bot.Store().Users().Set(user.ID, *user)
+		if u.bot.Store() != nil {
+			u.bot.Store().Users().Set(user.ID, user)
 		}
-		u.bot.Log().Debug().Any(u.ID()).Send("User was returned from API")
 		return
 	}
-	return nil, errs.ItemNotFound
+	return discord.User{}, errs.ItemNotFound
 }
 
 func (u userResolver) Send() (msg discord.CreateMessageBuilder, err error) {
@@ -65,16 +62,16 @@ func (u userResolver) Send() (msg discord.CreateMessageBuilder, err error) {
 	return u.bot.API().LowLevel().SendDM(dm.ID), nil
 }
 
-func (u userResolver) CreateDM() (ch *discord.Channel, err error) {
+func (u userResolver) CreateDM() (ch discord.Channel, err error) {
 	if !u.ignoreCache && u.bot.Store() != nil {
 		ch, ok := u.bot.Store().Private().Get(u.ID())
 		if ok {
-			return &ch, nil
+			return ch, nil
 		}
 	}
 	ch, err = u.UserQuery.CreateDM()
-	if ch != nil && err == nil && !u.ignoreCache && u.bot.Store() != nil {
-		u.bot.Store().Private().Set(u.ID(), *ch)
+	if err == nil && !u.ignoreCache && u.bot.Store() != nil {
+		u.bot.Store().Private().Set(u.ID(), ch)
 	}
 	return
 }

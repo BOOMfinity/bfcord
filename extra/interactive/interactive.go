@@ -1,3 +1,31 @@
+// Package interactive contains basic API for creating menus with buttons and selects.
+//
+/*
+	menu := NewInteractive(manager, interaction)
+	yes := func(i *interactions.Interaction) bool {
+		i.ComponentMessageUpdate().Content("Message successfully deleted!").Execute()
+		return false
+	}
+	no := func(i *interactions.Interaction) bool {
+		i.ComponentMessageUpdate().Content("Message deletion has been canceled!").Execute()
+		return false
+	}
+	interaction.SendMessageReply().
+		Content("Are you sure you want to delete this message?").
+		ActionRow(
+			components.NewButton(components.ButtonStyleSuccess).SetCustomID("yes").SetLabel("Yes!"),
+			components.NewButton(components.ButtonStyleDanger).SetCustomID("nope").SetLabel("Nope!")).
+		Execute()
+	menu.SetFilter(func(i *interactions.Interaction) bool {
+		return i.UserID() == interaction.UserID()
+	})
+	menu.Start(interactive.Actions{
+		"yes": yes,
+		"nope": no,
+	})
+
+The boolean output variable in action handler means if you want to listen for another interaction (if false, stops listening and exits a loop).
+*/
 package interactive
 
 import (
@@ -40,6 +68,7 @@ func (m *Manager) onInteractionCreate(_ client.Client, _ *gateway.Shard, ev *int
 	}
 }
 
+// Return false if you no longer want to listen for interactions.
 type Handler func(i *interactions.Interaction) bool
 
 type Actions map[string]Handler

@@ -209,6 +209,16 @@ func (v *client) Get(id uint16) *gateway.Shard {
 	return nil
 }
 
+func (v *client) CurrentUser() (user discord.User, err error) {
+	if v.current.Valid() && v.Store() != nil {
+		user, found := v.Store().Users().Get(v.current)
+		if found {
+			return user, nil
+		}
+	}
+	return v.User(v.current).NoCache().Get()
+}
+
 func (v *client) Start(ctx context.Context) error {
 	v.Log().Info().Send("Spawning %v shard(-s)", len(v.config.Shards))
 	_ = v.limiter.Wait(context.Background())

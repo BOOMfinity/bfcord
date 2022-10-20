@@ -35,7 +35,7 @@ func (b *WebhookUpdateMessageBuilder[B]) Thread(id snowflake.ID) B {
 	return b.B
 }
 
-func (b *WebhookUpdateMessageBuilder[B]) Execute() (msg *discord.Message, err error) {
+func (b *WebhookUpdateMessageBuilder[B]) Execute() (msg discord.Message, err error) {
 	return b.api.LowLevel().UpdateWebhookMessage(b.ID, b.Token, b.Message, b.Create.MessageCreate, b.ThreadID)
 }
 
@@ -77,7 +77,7 @@ func (b *WebhookExecuteBuilder[B]) NoWait() B {
 	return b.B
 }
 
-func (b *WebhookExecuteBuilder[B]) Execute() (msg *discord.Message, err error) {
+func (b *WebhookExecuteBuilder[B]) Execute() (msg discord.Message, err error) {
 	return b.api.LowLevel().ExecuteWebhook(b.ID, b.Token, b.Create, !b.Nowait, b.ThreadID)
 }
 
@@ -235,12 +235,12 @@ func (m *MessageBuilder[B]) SuppressEmbeds() B {
 	panic("implement me")
 }
 
-func (m *MessageBuilder[B]) Execute(api discord.ClientQuery) (*discord.Message, error) {
+func (m *MessageBuilder[B]) Execute(api discord.ClientQuery) (discord.Message, error) {
 	if m.MessageID.Valid() {
 		if !m.attachmentsDisabled {
 			msg, err := api.Channel(m.ChannelID).Message(m.MessageID).Get()
 			if err != nil {
-				return nil, fmt.Errorf("couldn't fetch attachments: %w", err)
+				return discord.Message{}, fmt.Errorf("couldn't fetch attachments: %w", err)
 			}
 			m.KeepFiles(msg.Attachments)
 		} else {

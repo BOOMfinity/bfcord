@@ -57,7 +57,7 @@ func (x Member) Permissions(bot ClientQuery) (perm permissions.Permission, err e
 	return bot.Guild(x.GuildID).Member(x.UserID).Permissions()
 }
 
-func BasePermissions(member Member, guild BaseGuild) (perm permissions.Permission) {
+func BasePermissions(member Member, guild Guild) (perm permissions.Permission) {
 	if guild.OwnerID == member.UserID {
 		return permissions.All
 	}
@@ -74,7 +74,7 @@ func BasePermissions(member Member, guild BaseGuild) (perm permissions.Permissio
 	return
 }
 
-func ChannelPermissions(guild BaseGuild, member Member, overwrites []permissions.Overwrite) (perm permissions.Permission) {
+func ChannelPermissions(guild Guild, member Member, overwrites []permissions.Overwrite) (perm permissions.Permission) {
 	base := BasePermissions(member, guild)
 	if base.Administrator() {
 		return permissions.All

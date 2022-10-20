@@ -6,17 +6,17 @@ import (
 )
 
 type MessageBuilder interface {
-	BuilderExecutor[*Message]
+	BuilderExecutor[Message]
 	BaseMessageBuilder[MessageBuilder]
 }
 
 type WebhookExecuteBuilder interface {
-	Execute() (msg *Message, err error)
+	Execute() (msg Message, err error)
 	ExpandableWebhookExecuteBuilder[WebhookExecuteBuilder]
 }
 
 type WebhookUpdateMessageBuilder interface {
-	Execute() (msg *Message, err error)
+	Execute() (msg Message, err error)
 	ExpandableWebhookUpdateMessageBuilder[WebhookUpdateMessageBuilder]
 }
 
@@ -66,7 +66,7 @@ type BuilderExecutor[R any] interface {
 }
 
 type CreateMessageBuilder interface {
-	BuilderExecutor[*Message]
+	BuilderExecutor[Message]
 	_createMessageBuilder[CreateMessageBuilder]
 }
 
@@ -78,7 +78,7 @@ type _createMessageBuilder[B any] interface {
 }
 
 type CreateForumMessageBuilder interface {
-	BuilderExecutor[*ChannelWithMessage]
+	BuilderExecutor[ChannelWithMessage]
 	_createForumMessageBuilder[CreateForumMessageBuilder]
 }
 

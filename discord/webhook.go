@@ -9,7 +9,7 @@ type Webhook struct {
 	Url           string       `json:"url"`
 	User          User         `json:"user"`
 	SourceChannel Channel      `json:"source_channel"`
-	SourceGuild   BaseGuild    `json:"source_guild"`
+	SourceGuild   Guild        `json:"source_guild"`
 	GuildID       snowflake.ID `json:"guild_id"`
 	ID            snowflake.ID `json:"id"`
 	Type          int          `json:"type"`

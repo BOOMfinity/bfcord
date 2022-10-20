@@ -183,7 +183,7 @@ func (v *Client) Guild(id snowflake.ID) discord.GuildQuery {
 	return NewGuildQuery(v, id)
 }
 
-func (v Client) CurrentUser() (user *discord.User, err error) {
+func (v Client) CurrentUser() (user discord.User, err error) {
 	req := v.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/users/@me", FullApiUrl))
 	err = v.DoResult(req, &user)

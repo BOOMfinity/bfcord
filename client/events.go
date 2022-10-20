@@ -69,7 +69,7 @@ type StageEvent func(bot Client, shard *gateway.Shard, ev discord.StageInstance)
 
 type ReadyEvent func(bot Client)
 type InteractionEvent func(bot Client, shard *gateway.Shard, ev *interactions.Interaction)
-type GuildCreateEvent func(bot Client, shard *gateway.Shard, ev discord.Guild)
+type GuildCreateEvent func(bot Client, shard *gateway.Shard, ev discord.GuildWithData)
 
 type MessageCreateEvent func(bot Client, shard *gateway.Shard, ev discord.Message)
 type MessageUpdateEvent func(bot Client, shard *gateway.Shard, ev discord.Message, old *discord.BaseMessage)
@@ -128,8 +128,8 @@ type ThreadUpdateEvent func(bot Client, shard *gateway.Shard, ev discord.Channel
 type ThreadDeleteEvent func(bot Client, shard *gateway.Shard, ev discord.Channel)
 type ThreadMemberUpdateEvent func(bot Client, shard *gateway.Shard, ev discord.ThreadMember)
 type ThreadMembersUpdateEvent func(bot Client, shard *gateway.Shard, ev gateway.ThreadMembersUpdateEvent)
-type GuildUpdateEvent func(bot Client, shard *gateway.Shard, ev discord.BaseGuild, old *discord.BaseGuild)
-type GuildDeleteEvent func(bot Client, shard *gateway.Shard, ev gateway.UnavailableGuild, cache *discord.BaseGuild)
+type GuildUpdateEvent func(bot Client, shard *gateway.Shard, ev discord.Guild, old *discord.Guild)
+type GuildDeleteEvent func(bot Client, shard *gateway.Shard, ev gateway.UnavailableGuild, cache *discord.Guild)
 
 type PresenceUpdate func(bot Client, shard *gateway.Shard, ev discord.Presence)
 

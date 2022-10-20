@@ -1,13 +1,12 @@
-// This package allows communication with Discord through its gateway.
+// Package gateway allows you to communicate with Discord.
 //
 // We use pre-allocated buffers to prevent future allocations. You can adjust them using options.
 //
-// Each gateway is limited to ONE data handler
+// # Each gateway is limited to ONE data handler
 //
-// IMPORTANT: Payload pointer that is passed as first data handler argument is SHARED.
+// WARNING: Payload pointer that is passed as first data handler argument is SHARED.
 // This means that the gateway uses it for every message that comes through the websocket, and DO NOT SHARE this pointer to another thread (goroutine).
 // Payload processing from A to Z must be synchronous for gateway to wait when payload is free to be reused.
-
 package gateway
 
 import (

@@ -56,6 +56,6 @@ func (u *UpdateGuildMemberBuilder) DisableCommunicationUntil(t time.Time) discor
 	return u
 }
 
-func (u *UpdateGuildMemberBuilder) Execute(api discord.ClientQuery, reason ...string) (member *discord.MemberWithUser, err error) {
+func (u *UpdateGuildMemberBuilder) Execute(api discord.ClientQuery, reason ...string) (member discord.MemberWithUser, err error) {
 	return api.LowLevel().Reason(strings.Join(reason, " ")).UpdateGuildMember(u.Guild, u.ID, u.Data)
 }

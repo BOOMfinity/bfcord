@@ -74,12 +74,12 @@ type MessageInteraction struct {
 	Type uint8        `json:"type"`
 }
 
-func (v BaseMessage) fetch(api ClientQuery) (*Message, error) {
+func (v BaseMessage) fetch(api ClientQuery) (Message, error) {
 	// TODO: Ignore cache
 	return api.Channel(v.ChannelID).Message(v.ID).Get()
 }
 
-func (v *BaseMessage) fetchPatch(msg *Message) {
+func (v *BaseMessage) fetchPatch(msg Message) {
 	v.Content = msg.Content
 	v.Type = msg.Type
 	v.Embeds = msg.Embeds

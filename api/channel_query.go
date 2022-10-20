@@ -10,6 +10,8 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+var _ = (discord.ChannelQuery)(&ChannelQuery{})
+
 type ChannelQuery struct {
 	client *Client
 	emptyOptions[discord.ChannelQuery]
@@ -24,7 +26,7 @@ func (c ChannelQuery) Messages() discord.ChannelMessagesQuery {
 	return NewChannelMessagesQuery(c.client, c.id)
 }
 
-func (c ChannelQuery) Get() (ch *discord.Channel, err error) {
+func (c ChannelQuery) Get() (ch discord.Channel, err error) {
 	req := c.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v", FullApiUrl, c.id))
 	err = c.client.DoResult(req, &ch)
@@ -124,7 +126,7 @@ func (c ChannelQuery) RemoveMember(id snowflake.ID) error {
 	return c.client.DoNoResp(req)
 }
 
-func (c ChannelQuery) GetThreadMember(id snowflake.ID) (tm *discord.ThreadMember, err error) {
+func (c ChannelQuery) GetThreadMember(id snowflake.ID) (tm discord.ThreadMember, err error) {
 	req := c.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/thread-members/%v", FullApiUrl, c.id, id))
 	err = c.client.DoResult(req, &tm)
@@ -164,7 +166,7 @@ type StageQuery struct {
 	id snowflake.ID
 }
 
-func (s StageQuery) Create(topic string, notify bool) (stage *discord.StageInstance, err error) {
+func (s StageQuery) Create(topic string, notify bool) (stage discord.StageInstance, err error) {
 	req := s.client.New(true)
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.SetRequestURI(FullApiUrl + "/stage-instances")
@@ -175,7 +177,8 @@ func (s StageQuery) Create(topic string, notify bool) (stage *discord.StageInsta
 			"send_start_notification": notify,
 		})
 		if _err != nil {
-			return nil, fmt.Errorf("failed to marshal json body: %w", _err)
+			err = fmt.Errorf("failed to marshal json body: %w", _err)
+			return
 		}
 		req.SetBody(json)
 	}
@@ -183,14 +186,14 @@ func (s StageQuery) Create(topic string, notify bool) (stage *discord.StageInsta
 	return
 }
 
-func (s StageQuery) Get() (stage *discord.StageInstance, err error) {
+func (s StageQuery) Get() (stage discord.StageInstance, err error) {
 	req := s.client.New(true)
 	req.SetRequestURI(FullApiUrl + "/stage-instances")
 	err = s.client.DoResult(req, &stage)
 	return
 }
 
-func (s StageQuery) Modify(topic string) (stage *discord.StageInstance, err error) {
+func (s StageQuery) Modify(topic string) (stage discord.StageInstance, err error) {
 	req := s.client.New(true)
 	req.Header.SetMethod(fasthttp.MethodPatch)
 	req.SetRequestURI(fmt.Sprintf("%v/stage-instances/%v", FullApiUrl, s.id))
@@ -198,7 +201,8 @@ func (s StageQuery) Modify(topic string) (stage *discord.StageInstance, err erro
 		"topic": topic,
 	})
 	if _err != nil {
-		return nil, fmt.Errorf("failed to marshal json body: %w", _err)
+		err = fmt.Errorf("failed to marshal json body: %w", _err)
+		return
 	}
 	req.SetBody(json)
 	err = s.client.DoResult(req, &stage)
