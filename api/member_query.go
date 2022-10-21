@@ -22,6 +22,7 @@ type MemberQuery struct {
 }
 
 func (v MemberQuery) VoiceState() (state discord.VoiceState, err error) {
+	// TODO: JEBANY DISCORD
 	return discord.VoiceState{}, errs.HTTPNotFound
 }
 

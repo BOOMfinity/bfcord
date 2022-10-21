@@ -89,7 +89,7 @@ Gateway methods are accessible within client:
 
 Refer to docs for more advanced usage.
 ## Voice
-See: [readme.md]() and [godoc]() of voice package
+See: and [godoc]() of voice package (readme soon)
 
 # Modular usage
 Each of the packages can be used independently (excl. client). For example, you can grab just the gateway and api package, and write your own logic around it.
