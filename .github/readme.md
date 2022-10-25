@@ -85,7 +85,7 @@ bot.API().Guild(3213232312312).Edit().Name("new name").Description("new descript
 ## Gateway ([godoc]())
 Gateway methods are accessible within client:
 * [`client.ChangeVoiceState()`]()
-* [`clientczy .FetchMembers()`]()
+* [`client.FetchMembers()`]()
 
 Refer to docs for more advanced usage.
 ## Voice
