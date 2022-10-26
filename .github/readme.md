@@ -34,13 +34,13 @@ bot.Wait()
 ```
 
 # Packages and features
-## Client ([godoc]())
+## Client ([godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/client))
 Client is an intuitive wrapper over gateway, api and cache packages. It provides convenient methods for interacting with discord, listening for events, and fetching data from API and cache.
-## Slash ([godoc]()) and Interactive ([godoc]())
+## Slash ([godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/slash)) and Interactive ([godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/extra/interactive))
 Slash package provides basic API client for managing slash commands
 
 Interactive is a utility package giving easier ways to use and interact with message components (buttons, lists, etc.)
-## Cache ([godoc]())
+## Cache ([godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/cache))
 Cache is accessible under client.Store() method. However, you can (should?) use methods built into client whenever possible (ex: bot.Guild(), Channel(), User()), as they automatically fall back to API if object is not in cache yet.
 
 bfcord uses modern and performant stores built with SliceMap approach and generics. This ensures low load on GC while maintaining high performance.
@@ -59,7 +59,7 @@ guilds := bot.Store().Guilds().Filter(func(guild discord.BaseGuild) bool {
 	return guild.MemberCount > 1000
 })
 ```
-## API ([godoc]())
+## API ([godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/api))
 > **Note**
 > Not all endpoints are implemented at this moment - if something is missing and you need it - notify us 
 
@@ -82,14 +82,14 @@ msg, err := bot.API().Channel(1654564363426634).SendMessage().Embed(discord.Mess
 bot.API().Guild(3213232312312).Edit().Name("new name").Description("new description").AFKChannelID(1232312312414).Execute(bot, "test reason")
 ```
 
-## Gateway ([godoc]())
+## Gateway ([godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/gateway))
 Gateway methods are accessible within client:
-* [`client.ChangeVoiceState()`]()
-* [`client.FetchMembers()`]()
+* [`client.ChangeVoiceState()`](https://pkg.go.dev/github.com/BOOMfinity/bfcord/client#Client)
+* [`client.FetchMembers()`](https://pkg.go.dev/github.com/BOOMfinity/bfcord/client#Client)
 
 Refer to docs for more advanced usage.
 ## Voice
-See: and [godoc]() of voice package (readme soon)
+See: [godoc](https://pkg.go.dev/github.com/BOOMfinity/bfcord/voice) of voice package (readme soon)
 
 # Modular usage
 Each of the packages can be used independently (excl. client). For example, you can grab just the gateway and api package, and write your own logic around it.
