@@ -149,6 +149,13 @@ func (c ChannelQuery) ID() snowflake.ID {
 	return c.id
 }
 
+func (c ChannelQuery) Webhooks() (res []discord.Webhook, err error) {
+	req := c.client.New(true)
+	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/webhooks", FullApiUrl, c.id))
+	req.Header.SetMethod(fasthttp.MethodGet)
+	return res, c.client.DoResult(req, &res)
+}
+
 func NewChannelQuery(client *Client, id snowflake.ID) *ChannelQuery {
 	d := &ChannelQuery{
 		id:     id,
@@ -171,7 +178,7 @@ func (s StageQuery) Create(topic string, notify bool) (stage discord.StageInstan
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.SetRequestURI(FullApiUrl + "/stage-instances")
 	if topic != "" {
-		json, _err := json.Marshal(map[string]any{
+		jsonD, _err := json.Marshal(map[string]any{
 			"topic":                   topic,
 			"channel_id":              s.id,
 			"send_start_notification": notify,
@@ -180,7 +187,7 @@ func (s StageQuery) Create(topic string, notify bool) (stage discord.StageInstan
 			err = fmt.Errorf("failed to marshal json body: %w", _err)
 			return
 		}
-		req.SetBody(json)
+		req.SetBody(jsonD)
 	}
 	err = s.client.DoResult(req, &stage)
 	return
@@ -197,14 +204,14 @@ func (s StageQuery) Modify(topic string) (stage discord.StageInstance, err error
 	req := s.client.New(true)
 	req.Header.SetMethod(fasthttp.MethodPatch)
 	req.SetRequestURI(fmt.Sprintf("%v/stage-instances/%v", FullApiUrl, s.id))
-	json, _err := json.Marshal(map[string]any{
+	jsonD, _err := json.Marshal(map[string]any{
 		"topic": topic,
 	})
 	if _err != nil {
 		err = fmt.Errorf("failed to marshal json body: %w", _err)
 		return
 	}
-	req.SetBody(json)
+	req.SetBody(jsonD)
 	err = s.client.DoResult(req, &stage)
 	return
 }

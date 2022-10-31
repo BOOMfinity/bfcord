@@ -81,6 +81,7 @@ type ChannelQuery interface {
 	GetThreadMember(id snowflake.ID) (tm ThreadMember, err error)
 	Stage() StageQuery
 	ID() snowflake.ID
+	Webhooks() ([]Webhook, error)
 }
 
 type StageQuery interface {
