@@ -1,6 +1,9 @@
 package discord
 
-import "github.com/andersfylling/snowflake/v5"
+import (
+	"github.com/BOOMfinity/bfcord/api/images"
+	"github.com/andersfylling/snowflake/v5"
+)
 
 type Webhook struct {
 	Avatar        string       `json:"avatar"`
@@ -29,4 +32,10 @@ type WebhookExecute struct {
 	MessageCreate
 	Username  *string `json:"username,omitempty"`
 	AvatarURL *string `json:"avatar_url,omitempty"`
+}
+
+type WebhookCreate struct {
+	Name   string        `json:"name"`
+	Avatar *images.Image `json:"avatar,omitempty"`
+	Reason string        `json:"-"`
 }

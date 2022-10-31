@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"github.com/BOOMfinity/bfcord/api/builders"
-
 	"github.com/BOOMfinity/bfcord/discord"
 	"github.com/andersfylling/snowflake/v5"
 	"github.com/segmentio/encoding/json"
@@ -153,6 +152,21 @@ func (c ChannelQuery) Webhooks() (res []discord.Webhook, err error) {
 	req := c.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/webhooks", FullApiUrl, c.id))
 	req.Header.SetMethod(fasthttp.MethodGet)
+	return res, c.client.DoResult(req, &res)
+}
+
+func (c ChannelQuery) CreateWebhook(opts discord.WebhookCreate) (res discord.Webhook, err error) {
+	req := c.client.New(true)
+	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/webhooks", FullApiUrl, c.id))
+	req.Header.SetMethod(fasthttp.MethodPost)
+	raw, err := json.Marshal(opts)
+	if err != nil {
+		return discord.Webhook{}, err
+	}
+	req.SetBody(raw)
+	if opts.Reason != "" {
+		req.Header.Set("X-Audit-Log-Reason", opts.Reason)
+	}
 	return res, c.client.DoResult(req, &res)
 }
 

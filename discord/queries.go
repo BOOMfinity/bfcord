@@ -82,6 +82,7 @@ type ChannelQuery interface {
 	Stage() StageQuery
 	ID() snowflake.ID
 	Webhooks() ([]Webhook, error)
+	CreateWebhook(create WebhookCreate) (Webhook, error)
 }
 
 type StageQuery interface {
