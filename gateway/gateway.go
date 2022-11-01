@@ -161,7 +161,7 @@ func (g *Gateway) dial(ctx context.Context) (err error) {
 	g.ws.WS().SetReadLimit(819200000000)
 	g.ws.OnMessageReader(g._onMessage)
 	g.ws.OnError(func(_ *wshelper.Connection, err error) {
-		panic(err)
+		g.Logger.Error().SendError(err)
 	})
 	return nil
 }
