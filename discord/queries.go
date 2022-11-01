@@ -179,7 +179,7 @@ type ClientQuery interface {
 	CurrentUser() (user User, err error)
 	Channel(id snowflake.ID) ChannelQuery
 	Guild(id snowflake.ID) GuildQuery
-	// Logger returns instance of global logger
+	// Log returns instance of global logger
 	Log() golog.Logger
 
 	LowLevel() LowLevelClientQuery

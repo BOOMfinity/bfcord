@@ -9,9 +9,8 @@ import (
 type ShardStatus uint8
 
 const (
-	ShardStatusDisconnected = iota
+	ShardStatusDisconnected ShardStatus = iota + 1
 	ShardStatusConnected
-	ShardStatusReconnecting
 )
 
 func NewShard(gateway *Gateway) *Shard {

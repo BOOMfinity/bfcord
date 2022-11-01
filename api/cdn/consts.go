@@ -1,6 +1,6 @@
 package cdn
 
-const CdnUrl = "https://cdn.discordapp.com"
+const Url = "https://cdn.discordapp.com"
 
 type ImageSize uint32
 
