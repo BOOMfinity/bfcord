@@ -25,7 +25,7 @@ func (c ChannelQuery) Messages() discord.ChannelMessagesQuery {
 	return NewChannelMessagesQuery(c.client, c.id)
 }
 
-func (c ChannelQuery) Get() (ch discord.Channel, err error) {
+func (c ChannelQuery) Get() (ch *discord.Channel, err error) {
 	req := c.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v", FullApiUrl, c.id))
 	err = c.client.DoResult(req, &ch)
@@ -125,7 +125,7 @@ func (c ChannelQuery) RemoveMember(id snowflake.ID) error {
 	return c.client.DoNoResp(req)
 }
 
-func (c ChannelQuery) GetThreadMember(id snowflake.ID) (tm discord.ThreadMember, err error) {
+func (c ChannelQuery) GetThreadMember(id snowflake.ID) (tm *discord.ThreadMember, err error) {
 	req := c.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/thread-members/%v", FullApiUrl, c.id, id))
 	err = c.client.DoResult(req, &tm)
@@ -155,13 +155,13 @@ func (c ChannelQuery) Webhooks() (res []discord.Webhook, err error) {
 	return res, c.client.DoResult(req, &res)
 }
 
-func (c ChannelQuery) CreateWebhook(opts discord.WebhookCreate) (res discord.Webhook, err error) {
+func (c ChannelQuery) CreateWebhook(opts discord.WebhookCreate) (res *discord.Webhook, err error) {
 	req := c.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/channels/%v/webhooks", FullApiUrl, c.id))
 	req.Header.SetMethod(fasthttp.MethodPost)
 	raw, err := json.Marshal(opts)
 	if err != nil {
-		return discord.Webhook{}, err
+		return nil, err
 	}
 	req.SetBody(raw)
 	if opts.Reason != "" {
@@ -187,7 +187,7 @@ type StageQuery struct {
 	id snowflake.ID
 }
 
-func (s StageQuery) Create(topic string, notify bool) (stage discord.StageInstance, err error) {
+func (s StageQuery) Create(topic string, notify bool) (stage *discord.StageInstance, err error) {
 	req := s.client.New(true)
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.SetRequestURI(FullApiUrl + "/stage-instances")
@@ -207,14 +207,14 @@ func (s StageQuery) Create(topic string, notify bool) (stage discord.StageInstan
 	return
 }
 
-func (s StageQuery) Get() (stage discord.StageInstance, err error) {
+func (s StageQuery) Get() (stage *discord.StageInstance, err error) {
 	req := s.client.New(true)
 	req.SetRequestURI(FullApiUrl + "/stage-instances")
 	err = s.client.DoResult(req, &stage)
 	return
 }
 
-func (s StageQuery) Modify(topic string) (stage discord.StageInstance, err error) {
+func (s StageQuery) Modify(topic string) (stage *discord.StageInstance, err error) {
 	req := s.client.New(true)
 	req.Header.SetMethod(fasthttp.MethodPatch)
 	req.SetRequestURI(fmt.Sprintf("%v/stage-instances/%v", FullApiUrl, s.id))

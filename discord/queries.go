@@ -16,16 +16,16 @@ type QueryOptions[V any] interface {
 type UserQuery interface {
 	QueryOptions[UserQuery]
 	// Get returns User type from cache (if used) or directly from Discord API
-	Get() (user User, err error)
+	Get() (user *User, err error)
 	// Send creates DM channel with user and sends defined message
 	Send() (msg CreateMessageBuilder, err error)
 	// CreateDM creates a private channel with user
-	CreateDM() (ch Channel, err error)
+	CreateDM() (ch *Channel, err error)
 	ID() snowflake.ID
 }
 
 type WebhookQuery interface {
-	Fetch() (wh Webhook, err error)
+	Fetch() (wh *Webhook, err error)
 	Execute() WebhookExecuteBuilder
 	Delete() (err error)
 	DeleteMessage(id snowflake.ID) (err error)
@@ -34,19 +34,19 @@ type WebhookQuery interface {
 
 type LowLevelClientQuery interface {
 	QueryOptions[LowLevelClientQuery]
-	CreateMessage(channel snowflake.ID, data MessageCreate) (msg Message, err error)
-	UpdateMessage(channel snowflake.ID, message snowflake.ID, data MessageCreate) (msg Message, err error)
-	ExecuteWebhook(id snowflake.ID, token string, data WebhookExecute, wait bool, thread snowflake.ID) (msg Message, err error)
-	UpdateWebhookMessage(id snowflake.ID, token string, message snowflake.ID, data MessageCreate, thread snowflake.ID) (msg Message, err error)
-	Message(method string, url string, _data any) (msg Message, err error)
-	UpdateChannel(id snowflake.ID, data ChannelUpdate) (ch Channel, err error)
-	CreateGuildChannel(guild snowflake.ID, data ChannelUpdate) (ch Channel, err error)
-	UpdateGuildMember(guild snowflake.ID, member snowflake.ID, data MemberUpdate) (m MemberWithUser, err error)
-	UpdateGuild(guild snowflake.ID, data GuildUpdate) (g Guild, err error)
+	CreateMessage(channel snowflake.ID, data MessageCreate) (msg *Message, err error)
+	UpdateMessage(channel snowflake.ID, message snowflake.ID, data MessageCreate) (msg *Message, err error)
+	ExecuteWebhook(id snowflake.ID, token string, data WebhookExecute, wait bool, thread snowflake.ID) (msg *Message, err error)
+	UpdateWebhookMessage(id snowflake.ID, token string, message snowflake.ID, data MessageCreate, thread snowflake.ID) (msg *Message, err error)
+	Message(method string, url string, _data any) (msg *Message, err error)
+	UpdateChannel(id snowflake.ID, data ChannelUpdate) (ch *Channel, err error)
+	CreateGuildChannel(guild snowflake.ID, data ChannelUpdate) (ch *Channel, err error)
+	UpdateGuildMember(guild snowflake.ID, member snowflake.ID, data MemberUpdate) (m *MemberWithUser, err error)
+	UpdateGuild(guild snowflake.ID, data GuildUpdate) (g *Guild, err error)
 	SendDM(channel snowflake.ID) (msg CreateMessageBuilder)
-	StartThread(channel snowflake.ID, message snowflake.ID, data ThreadCreate) (ch Channel, err error)
-	CreateOrUpdate(guild, role snowflake.ID, data RoleCreate) (r Role, err error)
-	CreateForumMessage(id snowflake.ID, data ForumMessageCreate) (d ChannelWithMessage, err error)
+	StartThread(channel snowflake.ID, message snowflake.ID, data ThreadCreate) (ch *Channel, err error)
+	CreateOrUpdate(guild, role snowflake.ID, data RoleCreate) (r *Role, err error)
+	CreateForumMessage(id snowflake.ID, data ForumMessageCreate) (d *ChannelWithMessage, err error)
 }
 
 type ChannelMessagesQuery interface {
@@ -61,7 +61,7 @@ type ChannelQuery interface {
 	QueryOptions[ChannelQuery]
 	Message(id snowflake.ID) MessageQuery
 	SendMessage() CreateMessageBuilder
-	Get() (ch Channel, err error)
+	Get() (ch *Channel, err error)
 	Edit() UpdateChannelTypeSelector
 	Delete() error
 	Messages() ChannelMessagesQuery
@@ -78,18 +78,18 @@ type ChannelQuery interface {
 	AddMember(id snowflake.ID) error
 	Leave() error
 	RemoveMember(id snowflake.ID) error
-	GetThreadMember(id snowflake.ID) (tm ThreadMember, err error)
+	GetThreadMember(id snowflake.ID) (tm *ThreadMember, err error)
 	Stage() StageQuery
 	ID() snowflake.ID
 	Webhooks() ([]Webhook, error)
-	CreateWebhook(create WebhookCreate) (Webhook, error)
+	CreateWebhook(create WebhookCreate) (*Webhook, error)
 }
 
 type StageQuery interface {
 	QueryOptions[StageQuery]
-	Create(topic string, notify bool) (stage StageInstance, err error)
-	Get() (stage StageInstance, err error)
-	Modify(topic string) (stage StageInstance, err error)
+	Create(topic string, notify bool) (stage *StageInstance, err error)
+	Get() (stage *StageInstance, err error)
+	Modify(topic string) (stage *StageInstance, err error)
 	Delete() error
 }
 
@@ -102,7 +102,7 @@ type MessageQuery interface {
 	React(emoji string) error
 	Reaction(emoji string) MessageReactionQuery
 	RemoveAllReactions() (err error)
-	Get() (msg Message, err error)
+	Get() (msg *Message, err error)
 	CrossPost() error
 	Pin() error
 	UnPin() error
@@ -126,7 +126,7 @@ type MessageReactionQuery interface {
 
 type GuildMemberQuery interface {
 	QueryOptions[GuildMemberQuery]
-	Get() (member MemberWithUser, err error)
+	Get() (member *MemberWithUser, err error)
 	Ban(days uint8) (err error)
 	Unban() (err error)
 	AddRole(role snowflake.ID) (err error)
@@ -135,21 +135,21 @@ type GuildMemberQuery interface {
 	Edit() UpdateGuildMemberBuilder
 	Permissions() (perm permissions.Permission, err error)
 	PermissionsIn(channel snowflake.ID) (perm permissions.Permission, err error)
-	VoiceState() (state VoiceState, err error)
+	VoiceState() (state *VoiceState, err error)
 	ID() snowflake.ID
 	GuildID() snowflake.ID
 }
 
 type RoleQuery interface {
 	QueryOptions[RoleQuery]
-	Get() (role Role, err error)
+	Get() (role *Role, err error)
 	Edit() RoleBuilder
 	Delete() error
 }
 
 type GuildQuery interface {
 	QueryOptions[GuildQuery]
-	Get() (guild Guild, err error)
+	Get() (guild *Guild, err error)
 	Delete() (err error)
 	Channels() (channels []Channel, err error)
 	CreateChannel(name string) GuildChannelBuilder
@@ -176,7 +176,7 @@ type ClientQuery interface {
 	// User returns user-specific Discord API methods
 	User(id snowflake.ID) UserQuery
 	// CurrentUser returns current logged user details
-	CurrentUser() (user User, err error)
+	CurrentUser() (user *User, err error)
 	Channel(id snowflake.ID) ChannelQuery
 	Guild(id snowflake.ID) GuildQuery
 	// Log returns instance of global logger

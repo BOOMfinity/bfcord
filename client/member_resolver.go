@@ -15,7 +15,7 @@ type memberResolver struct {
 	resolverOptions[discord.GuildMemberQuery]
 }
 
-func (mr memberResolver) VoiceState() (state discord.VoiceState, err error) {
+func (mr memberResolver) VoiceState() (state *discord.VoiceState, err error) {
 	states, _err := mr.bot.Guild(mr.GuildID()).NoAPI().VoiceStates()
 	if _err != nil && !errs.IsNotFound(_err) {
 		err = fmt.Errorf("could not fetch voice states from cache: %w", _err)
@@ -25,22 +25,23 @@ func (mr memberResolver) VoiceState() (state discord.VoiceState, err error) {
 		return item.UserID == mr.ID()
 	})
 	if found {
-		return _state, nil
+		return &_state, nil
 	}
-	return discord.VoiceState{}, errs.ItemNotFound
+	return nil, errs.ItemNotFound
 }
 
-func (mr memberResolver) Get() (member discord.MemberWithUser, err error) {
+func (mr memberResolver) Get() (member *discord.MemberWithUser, err error) {
 	if !mr.ignoreCache && mr.bot.Store() != nil {
 		m, ok := mr.bot.Store().Members().UnsafeGet(mr.GuildID()).Get(mr.ID())
 		if ok {
+			member = new(discord.MemberWithUser)
 			member.Member = m
 			user, _err := mr.bot.User(mr.ID()).Get()
 			if _err != nil {
 				err = fmt.Errorf("could not fetch user: %w", err)
 				return
 			}
-			member.User = user
+			member.User = *user
 			return
 		}
 	}
@@ -54,5 +55,5 @@ func (mr memberResolver) Get() (member discord.MemberWithUser, err error) {
 		}
 		return
 	}
-	return discord.MemberWithUser{}, errs.ItemNotFound
+	return nil, errs.ItemNotFound
 }

@@ -52,11 +52,11 @@ func (v *Client) LowLevel() discord.LowLevelClientQuery {
 	return d
 }
 
-func (v Client) Log() golog.Logger {
+func (v *Client) Log() golog.Logger {
 	return v.logger
 }
 
-func (v Client) acquireRequestData() *RequestData {
+func (v *Client) acquireRequestData() *RequestData {
 	data := requestDataPool.Get().(*RequestData)
 	data.timeout = v.timeout
 	data.retries = v.maxRetries
@@ -64,7 +64,7 @@ func (v Client) acquireRequestData() *RequestData {
 	return data
 }
 
-func (v Client) New(auth bool) *fasthttp.Request {
+func (v *Client) New(auth bool) *fasthttp.Request {
 	req := fasthttp.AcquireRequest()
 	req.Header.AddBytesV(fasthttp.HeaderContentType, contentJson)
 	if auth && len(v.staticHeader) > 0 {
@@ -73,7 +73,7 @@ func (v Client) New(auth bool) *fasthttp.Request {
 	return req
 }
 
-func (v Client) DoNoResp(req *fasthttp.Request, options ...Option) error {
+func (v *Client) DoNoResp(req *fasthttp.Request, options ...Option) error {
 	res, err := v.Do(req, options...)
 	if res != nil {
 		fasthttp.ReleaseResponse(res)
@@ -81,7 +81,7 @@ func (v Client) DoNoResp(req *fasthttp.Request, options ...Option) error {
 	return err
 }
 
-func (v Client) DoResult(req *fasthttp.Request, result any, options ...Option) error {
+func (v *Client) DoResult(req *fasthttp.Request, result any, options ...Option) error {
 	if reflect.ValueOf(result).Kind() != reflect.Ptr {
 		return errs.ResultMustBePointer
 	}
@@ -97,7 +97,7 @@ func (v Client) DoResult(req *fasthttp.Request, result any, options ...Option) e
 	return nil
 }
 
-func (v Client) DoBytes(req *fasthttp.Request, options ...Option) ([]byte, error) {
+func (v *Client) DoBytes(req *fasthttp.Request, options ...Option) ([]byte, error) {
 	res, err := v.Do(req, options...)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (v Client) DoBytes(req *fasthttp.Request, options ...Option) ([]byte, error
 	return res.Body(), nil
 }
 
-func (v Client) Do(req *fasthttp.Request, options ...Option) (*fasthttp.Response, error) {
+func (v *Client) Do(req *fasthttp.Request, options ...Option) (*fasthttp.Response, error) {
 	defer fasthttp.ReleaseRequest(req)
 	data := v.acquireRequestData()
 	defer requestDataPool.Put(data)
@@ -183,14 +183,14 @@ func (v *Client) Guild(id snowflake.ID) discord.GuildQuery {
 	return NewGuildQuery(v, id)
 }
 
-func (v Client) CurrentUser() (user discord.User, err error) {
+func (v *Client) CurrentUser() (user *discord.User, err error) {
 	req := v.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/users/@me", FullApiUrl))
 	err = v.DoResult(req, &user)
 	return
 }
 
-func (v Client) GatewayURL() (url string, err error) {
+func (v *Client) GatewayURL() (url string, err error) {
 	gateway := struct {
 		Url string `json:"url"`
 	}{}
@@ -212,7 +212,7 @@ type SessionInfo struct {
 	} `json:"session_start_limit"`
 }
 
-func (v Client) SessionData() (data SessionInfo, err error) {
+func (v *Client) SessionData() (data SessionInfo, err error) {
 	req := v.New(true)
 	req.SetRequestURI(FullApiUrl + "/gateway/bot")
 	err = v.DoResult(req, &data, WithRetryDelay(10*time.Second))

@@ -22,7 +22,7 @@ func (w webhookQuery) url() string {
 	}
 }
 
-func (w webhookQuery) Fetch() (wh discord.Webhook, err error) {
+func (w webhookQuery) Fetch() (wh *discord.Webhook, err error) {
 	req := w.api.New(true)
 	req.SetRequestURI(w.url())
 	err = w.api.DoResult(req, &wh)

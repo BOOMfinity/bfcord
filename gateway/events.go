@@ -82,7 +82,7 @@ type MessageDeleteEvent struct {
 	ID        snowflake.ID `json:"id"`
 }
 
-func (v MessageDeleteEvent) Message(api discord.ClientQuery) (discord.Message, error) {
+func (v MessageDeleteEvent) Message(api discord.ClientQuery) (*discord.Message, error) {
 	return api.Channel(v.ChannelID).Message(v.ID).Get()
 }
 
@@ -125,7 +125,7 @@ type MessageReactionRemoveEvent struct {
 	MessageID snowflake.ID  `json:"message_id"`
 }
 
-func (v MessageReactionRemoveEvent) User(api discord.ClientQuery) (discord.User, error) {
+func (v MessageReactionRemoveEvent) User(api discord.ClientQuery) (*discord.User, error) {
 	return api.User(v.UserID).Get()
 }
 

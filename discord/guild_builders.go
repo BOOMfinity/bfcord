@@ -23,5 +23,5 @@ type GuildBuilder interface {
 	RulesChannel(id snowflake.ID) GuildBuilder
 	PublicUpdatesChannel(id snowflake.ID) GuildBuilder
 	Locale(l string) GuildBuilder
-	Execute(api ClientQuery, reason ...string) (guild Guild, err error)
+	Execute(api ClientQuery, reason ...string) (guild *Guild, err error)
 }

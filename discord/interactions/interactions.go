@@ -269,7 +269,7 @@ func (v *originalUpdateBuilder) Execute() (err error) {
 		return
 	}
 	msg.Patch()
-	v.i.Message = msg
+	v.i.Message = *msg
 	return
 }
 

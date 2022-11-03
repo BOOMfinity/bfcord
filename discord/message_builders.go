@@ -11,12 +11,12 @@ type MessageBuilder interface {
 }
 
 type WebhookExecuteBuilder interface {
-	Execute() (msg Message, err error)
+	Execute() (msg *Message, err error)
 	ExpandableWebhookExecuteBuilder[WebhookExecuteBuilder]
 }
 
 type WebhookUpdateMessageBuilder interface {
-	Execute() (msg Message, err error)
+	Execute() (msg *Message, err error)
 	ExpandableWebhookUpdateMessageBuilder[WebhookUpdateMessageBuilder]
 }
 
@@ -58,11 +58,11 @@ type BaseMessageBuilder[B any] interface {
 }
 
 type BuilderExecutorReason[R any] interface {
-	Execute(api ClientQuery, reason ...string) (R, error)
+	Execute(api ClientQuery, reason ...string) (*R, error)
 }
 
 type BuilderExecutor[R any] interface {
-	Execute(api ClientQuery) (R, error)
+	Execute(api ClientQuery) (*R, error)
 }
 
 type CreateMessageBuilder interface {

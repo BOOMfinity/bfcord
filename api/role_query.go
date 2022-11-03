@@ -17,7 +17,7 @@ type RoleQuery struct {
 	role  snowflake.ID
 }
 
-func (r RoleQuery) Get() (role discord.Role, err error) {
+func (r RoleQuery) Get() (role *discord.Role, err error) {
 	req := r.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/roles/%v", FullApiUrl, r.guild, r.role))
 	err = r.api.DoResult(req, &role)

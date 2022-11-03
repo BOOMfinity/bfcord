@@ -58,7 +58,7 @@ func (r *roleBuilder) Mentionable(b bool) discord.RoleBuilder {
 	return r
 }
 
-func (r *roleBuilder) Execute(api discord.ClientQuery, reasons ...string) (role discord.Role, err error) {
+func (r *roleBuilder) Execute(api discord.ClientQuery, reasons ...string) (role *discord.Role, err error) {
 	return api.LowLevel().Reason(strings.Join(reasons, " ")).CreateOrUpdate(r.guild, r.id, r.data)
 }
 

@@ -12,5 +12,5 @@ type UpdateGuildMemberBuilder interface {
 	Deaf(isDeafened bool) UpdateGuildMemberBuilder
 	VoiceChannel(channel snowflake.ID) UpdateGuildMemberBuilder
 	DisableCommunicationUntil(t time.Time) UpdateGuildMemberBuilder
-	Execute(api ClientQuery, reason ...string) (member MemberWithUser, err error)
+	Execute(api ClientQuery, reason ...string) (member *MemberWithUser, err error)
 }

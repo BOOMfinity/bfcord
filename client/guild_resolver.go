@@ -46,22 +46,22 @@ func (gr guildResolver) Members(limit int, after snowflake.ID) (members []discor
 	return
 }
 
-func (gr guildResolver) Get() (discord.Guild, error) {
+func (gr guildResolver) Get() (*discord.Guild, error) {
 	if !gr.ignoreCache && gr.bot.Store() != nil {
 		g, ok := gr.bot.Store().Guilds().Get(gr.ID())
 		if ok {
-			return g, nil
+			return &g, nil
 		}
 	}
 	if !gr.ignoreAPI {
 		guild, err := gr.GuildQuery.Get()
 		if err != nil {
-			return discord.Guild{}, err
+			return nil, err
 		}
 		if gr.bot.Store() != nil {
-			gr.bot.Store().Guilds().Set(guild.ID, guild)
+			gr.bot.Store().Guilds().Set(guild.ID, *guild)
 		}
 		return guild, nil
 	}
-	return discord.Guild{}, errs.ItemNotFound
+	return nil, errs.ItemNotFound
 }

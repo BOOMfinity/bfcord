@@ -71,7 +71,7 @@ type CreateThreadBuilder[B any] struct {
 	Message snowflake.ID
 }
 
-func (c *CreateThreadBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch discord.Channel, err error) {
+func (c *CreateThreadBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch *discord.Channel, err error) {
 	return api.LowLevel().Reason(strings.Join(reason, " ")).StartThread(c.ID, c.Message, c.Data)
 }
 
@@ -142,7 +142,7 @@ func (c *ChannelBuilder[B]) Invitable(invitable bool) B {
 	return c.B
 }
 
-func (c *ChannelBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch discord.Channel, err error) {
+func (c *ChannelBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (ch *discord.Channel, err error) {
 	ll := api.LowLevel()
 	if len(reason) > 0 {
 		ll = ll.Reason(strings.Join(reason, " "))

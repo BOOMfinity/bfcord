@@ -7,7 +7,7 @@ import (
 )
 
 type FollowUpMessage struct {
-	discord.Message
+	*discord.Message
 	i *Interaction
 }
 

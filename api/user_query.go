@@ -15,7 +15,7 @@ type UserQuery struct {
 	id snowflake.ID
 }
 
-func (u UserQuery) Get() (user discord.User, err error) {
+func (u UserQuery) Get() (user *discord.User, err error) {
 	req := u.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/users/%v", FullApiUrl, u.id))
 	err = u.client.DoResult(req, &user)
@@ -34,7 +34,7 @@ func (u UserQuery) ID() snowflake.ID {
 	return u.id
 }
 
-func (u UserQuery) CreateDM() (channel discord.Channel, err error) {
+func (u UserQuery) CreateDM() (channel *discord.Channel, err error) {
 	req := u.client.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/users/@me/channels", FullApiUrl))
 	req.SetBodyString(fmt.Sprintf(`{"recipient_id": %v}`, u.id))

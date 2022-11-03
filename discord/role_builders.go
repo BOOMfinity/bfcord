@@ -18,7 +18,7 @@ type RoleBuilder interface {
 	Icon(i *images.MediaBuilder) RoleBuilder
 	UnicodeEmoji(str string) RoleBuilder
 	Mentionable(bool) RoleBuilder
-	Execute(api ClientQuery, reasons ...string) (role Role, err error)
+	Execute(api ClientQuery, reasons ...string) (role *Role, err error)
 }
 
 type RolePositions []Role

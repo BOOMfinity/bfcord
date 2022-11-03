@@ -146,7 +146,7 @@ func (g *GuildBuilder) Locale(l string) discord.GuildBuilder {
 	return g
 }
 
-func (g *GuildBuilder) Execute(api discord.ClientQuery, reason ...string) (guild discord.Guild, err error) {
+func (g *GuildBuilder) Execute(api discord.ClientQuery, reason ...string) (guild *discord.Guild, err error) {
 	if g.bannerBuilder != nil {
 		b, _err := g.bannerBuilder.ToBase64()
 		if _err != nil {

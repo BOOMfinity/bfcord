@@ -23,7 +23,7 @@ func (v *Message) Fetch(api ClientQuery) error {
 	if err != nil {
 		return err
 	}
-	v.fetchPatch(msg)
+	v.fetchPatch(*msg)
 	v.Reactions = msg.Reactions
 	v.Member = msg.Member
 	v.Author = msg.Author
@@ -74,7 +74,7 @@ type MessageInteraction struct {
 	Type uint8        `json:"type"`
 }
 
-func (v BaseMessage) fetch(api ClientQuery) (Message, error) {
+func (v BaseMessage) fetch(api ClientQuery) (*Message, error) {
 	// TODO: Ignore cache
 	return api.Channel(v.ChannelID).Message(v.ID).Get()
 }
@@ -92,7 +92,7 @@ func (v BaseMessage) Fetch(api ClientQuery) error {
 	if err != nil {
 		return err
 	}
-	v.fetchPatch(msg)
+	v.fetchPatch(*msg)
 	return nil
 }
 

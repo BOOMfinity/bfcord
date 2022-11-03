@@ -91,7 +91,7 @@ func (v GuildQuery) Members(limit int, after snowflake.ID) (members []discord.Me
 	return
 }
 
-func (v GuildQuery) Get() (guild discord.Guild, err error) {
+func (v GuildQuery) Get() (guild *discord.Guild, err error) {
 	req := v.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v", FullApiUrl, v.guild))
 	err = v.api.DoResult(req, &guild)

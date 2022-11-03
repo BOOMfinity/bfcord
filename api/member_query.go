@@ -21,12 +21,12 @@ type MemberQuery struct {
 	guild  snowflake.ID
 }
 
-func (v MemberQuery) VoiceState() (state discord.VoiceState, err error) {
+func (v MemberQuery) VoiceState() (state *discord.VoiceState, err error) {
 	// TODO: JEBANY DISCORD
-	return discord.VoiceState{}, errs.HTTPNotFound
+	return nil, errs.HTTPNotFound
 }
 
-func (v MemberQuery) Get() (member discord.MemberWithUser, err error) {
+func (v MemberQuery) Get() (member *discord.MemberWithUser, err error) {
 	req := v.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/members/%v", FullApiUrl, v.guild, v.member))
 	err = v.api.DoResult(req, &member)
@@ -108,7 +108,7 @@ func (v MemberQuery) Permissions() (perm permissions.Permission, err error) {
 	if err != nil {
 		return
 	}
-	return discord.BasePermissions(member.Member, guild), nil
+	return discord.BasePermissions(member.Member, *guild), nil
 }
 
 func (v MemberQuery) PermissionsIn(channel snowflake.ID) (perm permissions.Permission, err error) {
@@ -124,7 +124,7 @@ func (v MemberQuery) PermissionsIn(channel snowflake.ID) (perm permissions.Permi
 	if err != nil {
 		return
 	}
-	return discord.ChannelPermissions(guild, member.Member, ch.Overwrites), nil
+	return discord.ChannelPermissions(*guild, member.Member, ch.Overwrites), nil
 }
 
 func (v MemberQuery) ID() snowflake.ID {
