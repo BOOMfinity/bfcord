@@ -47,7 +47,9 @@ func (v lowLevelQuery) CreateForumMessage(id snowflake.ID, _data discord.ForumMe
 		req.Header.Set("X-Audit-Log-Reason", v.reason)
 	}
 	err = v.client.DoResult(req, &d)
-	d.Message.Patch()
+	if d != nil {
+		d.Message.Patch()
+	}
 	return
 }
 
@@ -261,7 +263,9 @@ func (v lowLevelQuery) Message(method string, url string, _data any) (msg *disco
 		req.Header.Set("X-Audit-Log-Reason", v.reason)
 	}
 	err = v.client.DoResult(req, &msg)
-	msg.Patch()
+	if msg != nil {
+		msg.Patch()
+	}
 	return
 }
 
@@ -300,8 +304,10 @@ func (v lowLevelQuery) UpdateGuildMember(guild snowflake.ID, member snowflake.ID
 	if err != nil {
 		return
 	}
-	m.GuildID = guild
-	m.UserID = member
+	if m != nil {
+		m.GuildID = guild
+		m.UserID = member
+	}
 	return
 }
 
