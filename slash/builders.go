@@ -126,9 +126,11 @@ type commandBuilder[B any] struct {
 
 func (c *commandBuilder[B]) Run() (cmd Command, err error) {
 	req := c.client.New(true)
-	url := fmt.Sprintf("%v/applications/%v/commands", api.FullApiUrl, c.app)
+	url := fmt.Sprintf("%v/applications/%v", api.FullApiUrl, c.app)
 	if c.guild.Valid() {
 		url += fmt.Sprintf("/guilds/%v/commands", c.guild)
+	} else {
+		url += "/commands"
 	}
 	if c.id.Valid() {
 		req.Header.SetMethod(fasthttp.MethodPatch)
