@@ -2,7 +2,9 @@ package discord
 
 import (
 	"github.com/BOOMfinity/bfcord/discord/permissions"
+	"github.com/BOOMfinity/go-utils/inlineif"
 	"github.com/andersfylling/snowflake/v5"
+	"golang.org/x/exp/slices"
 )
 
 // Role
@@ -27,6 +29,15 @@ func (r Role) Guild(api ClientQuery) GuildQuery {
 	return api.Guild(r.GuildID)
 }
 
+// ComparePosition compares this role's position to other one.
+func (r Role) ComparePosition(other *Role) int {
+	if r.Position == other.Position {
+		return int(other.ID - r.ID)
+	}
+
+	return r.Position - other.Position
+}
+
 // RoleTags
 //
 // Reference: https://discord.com/developers/docs/topics/permissions#role-object-role-tags-structure
@@ -44,4 +55,42 @@ type RoleCreate struct {
 	Icon         *string                 `json:"icon,omitempty"`
 	UnicodeEmoji *string                 `json:"unicode_emoji,omitempty"`
 	Mentionable  *bool                   `json:"mentionable,omitempty"`
+}
+
+type RoleSlice []Role
+
+func (rs RoleSlice) Highest() (highest *Role) {
+	if len(rs) == 0 {
+		return nil
+	}
+
+	for i := range rs {
+		if highest == nil {
+			highest = &rs[0]
+			continue
+		}
+
+		if rs[i].ComparePosition(highest) > 0 {
+			highest = &rs[i]
+		}
+	}
+	return
+}
+
+func (rs RoleSlice) HighestWithin(member *Member) (highest *Role) {
+	if len(rs) == 0 {
+		return nil
+	}
+
+	for i := range rs {
+		if highest == nil {
+			highest = inlineif.IfElse(slices.Contains(member.Roles, rs[i].ID), &rs[i], nil)
+			continue
+		}
+
+		if slices.Contains(member.Roles, rs[i].ID) && rs[i].ComparePosition(highest) > 0 {
+			highest = &rs[i]
+		}
+	}
+	return
 }
