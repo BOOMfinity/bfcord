@@ -5,7 +5,9 @@
 # EARLY ACCESS / BETA
 For this moment we CAN'T guarantee full stability for longer time perspective. The library is actively tested on our multiple bots and by our testers.
 
-## Getting started
+[![Discord Widget](https://discordapp.com/api/guilds/1036320104486547466/widget.png?style=banner4)](https://labs.boomfinity.xyz)
+
+# Getting started
 ### Installation
 ```
 go get github.com/BOOMfinity/bfcord
