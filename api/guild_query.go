@@ -181,7 +181,7 @@ func (v GuildQuery) Search(query string, limit uint16) (members []discord.Member
 	return
 }
 
-func (v GuildQuery) Roles() (roles []discord.Role, err error) {
+func (v GuildQuery) Roles() (roles discord.RoleSlice, err error) {
 	req := v.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/roles", FullApiUrl, v.guild))
 	return roles, v.api.DoResult(req, &roles)

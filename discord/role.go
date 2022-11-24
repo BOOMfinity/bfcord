@@ -94,3 +94,13 @@ func (rs RoleSlice) HighestWithin(member *Member) (highest *Role) {
 	}
 	return
 }
+
+func (rs RoleSlice) Find(id snowflake.ID) *Role {
+	index := slices.IndexFunc(rs, func(r Role) bool {
+		return r.ID == id
+	})
+	if index == -1 {
+		return nil
+	}
+	return &rs[index]
+}

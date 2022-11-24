@@ -17,13 +17,6 @@ type RoleQuery struct {
 	role  snowflake.ID
 }
 
-func (r RoleQuery) Get() (role *discord.Role, err error) {
-	req := r.api.New(true)
-	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/roles/%v", FullApiUrl, r.guild, r.role))
-	err = r.api.DoResult(req, &role)
-	return
-}
-
 func (r RoleQuery) Edit() discord.RoleBuilder {
 	return builders.NewRoleBuilder(r.guild, r.role, discord.RoleCreate{})
 }
