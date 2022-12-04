@@ -129,6 +129,8 @@ func (c *commandBuilder[B]) Run() (cmd Command, err error) {
 	url := fmt.Sprintf("%v/applications/%v", api.FullApiUrl, c.app)
 	if c.guild.Valid() {
 		url += fmt.Sprintf("/guilds/%v/commands", c.guild)
+	} else {
+		url += "/commands"
 	}
 	if c.id.Valid() {
 		req.Header.SetMethod(fasthttp.MethodPatch)
