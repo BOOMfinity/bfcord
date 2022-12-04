@@ -57,7 +57,7 @@ type Guild struct {
 	Description                 string                     `json:"description"`
 	Features                    []string                   `json:"features"`
 	Stickers                    []GuildSticker             `json:"stickers"`
-	Roles                       []Role                     `json:"roles"`
+	Roles                       RoleSlice                  `json:"roles"`
 	Emojis                      []Emoji                    `json:"emojis"`
 	AFKTimeout                  timeconv.Seconds           `json:"afk_timeout"`
 	MFALevel                    int                        `json:"mfa_level"`

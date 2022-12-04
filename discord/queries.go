@@ -142,7 +142,6 @@ type GuildMemberQuery interface {
 
 type RoleQuery interface {
 	QueryOptions[RoleQuery]
-	Get() (role *Role, err error)
 	Edit() RoleBuilder
 	Delete() error
 }
@@ -159,7 +158,7 @@ type GuildQuery interface {
 	Member(id snowflake.ID) GuildMemberQuery
 	Search(query string, limit uint16) (members []MemberWithUser, err error)
 	SetCurrentNick(nick string) (err error)
-	Roles() (roles []Role, err error)
+	Roles() (roles RoleSlice, err error)
 	VoiceStates() (states Slice[VoiceState], err error)
 	Invites() (invites []InviteWithMeta, err error)
 	Role(id snowflake.ID) RoleQuery

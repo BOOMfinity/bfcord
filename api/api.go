@@ -133,13 +133,13 @@ func (v *Client) Do(req *fasthttp.Request, options ...Option) (*fasthttp.Respons
 			return nil, err
 		}
 		if res.StatusCode() < 400 {
-			v.logger.Debug().Any(string(req.URI().Path())).Any(time.Since(_time)).Send("Response body: %vB", len(res.Body()))
+			v.logger.Debug().Any(string(req.Header.Method())+" "+string(req.URI().Path())).Any(time.Since(_time)).Send("Response body: %vB", len(res.Body()))
 		}
 		if (res.StatusCode() >= 400 && res.StatusCode() < 500) && !bytes.HasPrefix(req.URI().FullURI(), discordPrefix) {
-			v.logger.Warn().Any(string(req.URI().Path())).Any(time.Since(_time)).Send("Received status %v with %vB of body size", res.StatusCode(), len(res.Body()))
+			v.logger.Warn().Any(string(req.Header.Method())+" "+string(req.URI().Path())).Any(time.Since(_time)).Send("Received status %v with %vB of body size", res.StatusCode(), len(res.Body()))
 		}
 		if res.StatusCode() >= 500 {
-			v.logger.Error().Any(string(req.URI().Path())).Any(time.Since(_time)).Send("Internal server error :(")
+			v.logger.Error().Any(string(req.Header.Method()) + " " + string(req.URI().Path())).Any(time.Since(_time)).Send("Internal server error :(")
 			continue
 		}
 		if bytes.HasPrefix(req.URI().FullURI(), discordPrefix) {
@@ -148,7 +148,7 @@ func (v *Client) Do(req *fasthttp.Request, options ...Option) (*fasthttp.Respons
 				return nil, err
 			}
 			if res.StatusCode() == fasthttp.StatusTooManyRequests {
-				v.logger.Debug().Any(string(req.URI().Path())).Any(time.Since(_time)).Send("Just got rate limited :(")
+				v.logger.Debug().Any(string(req.Header.Method()) + " " + string(req.URI().Path())).Any(time.Since(_time)).Send("Just got rate limited :(")
 				data.retries--
 				continue
 			}
@@ -166,7 +166,7 @@ func (v *Client) Do(req *fasthttp.Request, options ...Option) (*fasthttp.Respons
 					}
 					err = dcErr
 				}
-				v.logger.Warn().Any(string(req.URI().Path())).Any(time.Since(_time)).Send(err.Error())
+				v.logger.Warn().Any(string(req.Header.Method()) + " " + string(req.URI().Path())).Any(time.Since(_time)).Send(err.Error())
 				return nil, err
 			}
 		}
