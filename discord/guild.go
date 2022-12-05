@@ -1,10 +1,13 @@
 package discord
 
 import (
+	"fmt"
+	"github.com/BOOMfinity/bfcord/api/cdn"
 	"github.com/BOOMfinity/bfcord/discord/permissions"
 	"github.com/BOOMfinity/bfcord/internal/timeconv"
 	"github.com/BOOMfinity/go-utils/nullable"
 	"github.com/andersfylling/snowflake/v5"
+	"strconv"
 )
 
 type GuildWithData struct {
@@ -103,6 +106,18 @@ func (v Guild) MemberPermissions(api ClientQuery, member snowflake.ID) (perm per
 		return permissions.All, nil
 	}
 	return api.Guild(v.ID).Member(member).Permissions()
+}
+
+// IconURL returns a URL of Guild icon.
+//
+// Size can be any power of two between 16 and 4096 (use constants from cdn package, or 0 for default).
+func (v Guild) IconURL(format cdn.ImageFormat, size cdn.ImageSize) string {
+	url := fmt.Sprintf("%v/icons/%v/%v.%v", cdn.Url, v.ID.String(), v.Icon, format)
+	if size != 0 {
+		url += "?size=" + strconv.Itoa(int(size))
+	}
+
+	return url
 }
 
 type GuildUpdate struct {
