@@ -162,6 +162,7 @@ func (g *Gateway) dial(ctx context.Context) (err error) {
 	g.ws.OnMessageReader(g._onMessage)
 	g.ws.OnError(func(_ *wshelper.Connection, err error) {
 		g.Logger.Error().SendError(err)
+		_ = g.Reconnect(context.Background(), true)
 	})
 	return nil
 }
