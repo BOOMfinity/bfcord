@@ -1,5 +1,10 @@
 package colors
 
+import (
+	"errors"
+	"strconv"
+)
+
 const (
 	Default         int64 = 0x000000
 	White           int64 = 0xffffff
@@ -25,3 +30,22 @@ const (
 	Greyple         int64 = 0x99aab5
 	DarkButNotBlack int64 = 0x2c2f33
 )
+
+// FromHex converts hex color from string to int64.
+func FromHex(hex string) (int64, error) {
+	if len(hex) != 7 {
+		return 0x0, errors.New("invalid hex format")
+	}
+
+	if hex[0] != '#' {
+		return 0x0, errors.New("invalid hex format")
+	}
+
+	hex = hex[1:]
+	intColor, err := strconv.ParseInt(hex, 16, 64)
+	if err != nil {
+		return 0x0, err
+	}
+
+	return intColor, nil
+}
