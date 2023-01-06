@@ -146,7 +146,7 @@ f:
 }
 
 func (v *client) CalcShard(guild snowflake.ID) uint16 {
-	return uint16(guild>>22) % v.config.ShardCount
+	return uint16(uint64(guild>>22) % uint64(v.config.ShardCount))
 }
 
 func (v *client) User(id snowflake.ID) discord.UserQuery {
