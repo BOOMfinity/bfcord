@@ -73,6 +73,7 @@ const (
 	VerifiedDeveloperUserFlag         UserFlag = 1 << 17
 	CertifiedDiscordModeratorUserFlag UserFlag = 1 << 18
 	HttpInteractionsOnlyUserFlag      UserFlag = 1 << 19
+	ActiveDeveloperUserFlag           UserFlag = 1 << 22
 )
 
 func (v UserFlag) Has(flag UserFlag) bool {
