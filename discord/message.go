@@ -182,32 +182,32 @@ const (
 //
 // Reference: https://discord.com/developers/docs/resources/channel#embed-object
 type MessageEmbed struct {
-	Timestamp   timeconv.Timestamp `json:"timestamp,omitempty"`
-	Author      EmbedAuthor        `json:"author,omitempty"`
-	Footer      EmbedFooter        `json:"footer,omitempty"`
-	Provider    EmbedProvider      `json:"provider,omitempty"`
-	Type        EmbedType          `json:"type"`
-	Description string             `json:"description,omitempty"`
-	Url         string             `json:"url,omitempty"`
-	Title       string             `json:"title"`
-	Fields      []EmbedField       `json:"fields,omitempty"`
-	Thumbnail   EmbedMedia         `json:"thumbnail,omitempty"`
-	Video       EmbedMedia         `json:"video,omitempty"`
-	Image       EmbedMedia         `json:"image,omitempty"`
-	Color       int64              `json:"color,omitempty"`
+	Timestamp   *timeconv.Timestamp `json:"timestamp,omitempty"`
+	Author      *EmbedAuthor        `json:"author,omitempty"`
+	Footer      *EmbedFooter        `json:"footer,omitempty"`
+	Provider    *EmbedProvider      `json:"provider,omitempty"`
+	Type        EmbedType           `json:"type,omitempty"`
+	Description string              `json:"description,omitempty"`
+	Url         string              `json:"url,omitempty"`
+	Title       string              `json:"title,omitempty"`
+	Fields      []EmbedField        `json:"fields,omitempty"`
+	Thumbnail   *EmbedMedia         `json:"thumbnail,omitempty"`
+	Video       *EmbedMedia         `json:"video,omitempty"`
+	Image       *EmbedMedia         `json:"image,omitempty"`
+	Color       int64               `json:"color,omitempty"`
 }
 
 type EmbedFooter struct {
 	Text         string `json:"text"`
-	IconUrl      string `json:"icon_url"`
-	ProxyIconUrl string `json:"proxy_icon_url"`
+	IconUrl      string `json:"icon_url,omitempty"`
+	ProxyIconUrl string `json:"proxy_icon_url,omitempty"`
 }
 
 type EmbedMedia struct {
-	Url      string `json:"url"`
-	ProxyUrl string `json:"proxy_url"`
-	Height   int    `json:"height"`
-	Width    int    `json:"width"`
+	Url      string `json:"url,omitempty"`
+	ProxyUrl string `json:"proxy_url,omitempty"`
+	Height   int    `json:"height,omitempty"`
+	Width    int    `json:"width,omitempty"`
 }
 
 type EmbedProvider struct {
@@ -217,9 +217,9 @@ type EmbedProvider struct {
 
 type EmbedAuthor struct {
 	Name         string `json:"name"`
-	Url          string `json:"url"`
-	IconUrl      string `json:"icon_url"`
-	ProxyIconUrl string `json:"proxy_icon_url"`
+	Url          string `json:"url,omitempty"`
+	IconUrl      string `json:"icon_url,omitempty"`
+	ProxyIconUrl string `json:"proxy_icon_url,omitempty"`
 }
 
 type EmbedField struct {
