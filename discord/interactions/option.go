@@ -6,6 +6,7 @@ import (
 	"github.com/BOOMfinity/bfcord/slash"
 	"github.com/andersfylling/snowflake/v5"
 	"github.com/segmentio/encoding/json"
+	"strconv"
 )
 
 var (
@@ -66,8 +67,10 @@ func (o *Option) String() (string, error) {
 }
 
 func (o *Option) Float() (float64, error) {
-	if x, ok := o.Value.(float64); ok {
-		return x, nil
+	if s, err := o.String(); err == nil {
+		if x, err := strconv.ParseFloat(s, 64); err == nil {
+			return x, nil
+		}
 	}
 	return 0, ValueParseFailedErr
 }
