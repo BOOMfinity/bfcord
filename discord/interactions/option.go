@@ -7,6 +7,7 @@ import (
 	"github.com/andersfylling/snowflake/v5"
 	"github.com/segmentio/encoding/json"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -52,7 +53,7 @@ func (o *Option) Attachment() (att discord.Attachment, err error) {
 }
 
 func (o *Option) Int() (int, error) {
-	float, err := o.Float()
+	float, err := o.Float(false)
 	if err != nil {
 		return 0, err
 	}
@@ -66,8 +67,11 @@ func (o *Option) String() (string, error) {
 	return "", ValueParseFailedErr
 }
 
-func (o *Option) Float() (float64, error) {
+func (o *Option) Float(AllowComma bool) (float64, error) {
 	if s, err := o.String(); err == nil {
+		if AllowComma {
+			s = strings.Replace(s, ",", ".", 1)
+		}
 		if x, err := strconv.ParseFloat(s, 64); err == nil {
 			return x, nil
 		}
