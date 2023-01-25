@@ -31,8 +31,8 @@ func (a *ActionRowBuilder) Size() int {
 	return len(a.components)
 }
 
-func (a *ActionRowBuilder) Add(components ...Component) *ActionRowBuilder {
-	a.components = components
+func (a *ActionRowBuilder) Add(components Component) *ActionRowBuilder {
+	a.components = append(a.components, components)
 	return a
 }
 
