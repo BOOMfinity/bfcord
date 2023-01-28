@@ -38,6 +38,10 @@ func (r Role) ComparePosition(other *Role) int {
 	return r.Position - other.Position
 }
 
+func (r Role) Mention() string {
+	return "<@" + r.ID.String() + ">"
+}
+
 // RoleTags
 //
 // Reference: https://discord.com/developers/docs/topics/permissions#role-object-role-tags-structure

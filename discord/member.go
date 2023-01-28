@@ -109,3 +109,7 @@ func ChannelPermissions(guild Guild, member Member, overwrites []permissions.Ove
 	}
 	return
 }
+
+func (x Member) Mention() string {
+	return "<@" + x.UserID.String() + ">"
+}

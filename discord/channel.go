@@ -98,6 +98,10 @@ func (v Channel) Thread() bool {
 	return v.Type == ChannelTypePublicThread || v.Type == ChannelTypeNewsThread || v.Type == ChannelTypePrivateThread
 }
 
+func (v Channel) Mention() string {
+	return "<#" + v.ID.String() + ">"
+}
+
 type ChannelFlag uint8
 
 const (

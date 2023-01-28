@@ -56,6 +56,10 @@ func (v User) Tag() string {
 	return v.Username + "#" + v.Discriminator
 }
 
+func (v User) Mention() string {
+	return "<@" + v.ID.String() + ">"
+}
+
 type UserFlag uint32
 
 const (
