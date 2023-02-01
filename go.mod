@@ -7,14 +7,14 @@ require (
 	github.com/BOOMfinity/golog v1.0.5
 	github.com/BOOMfinity/wshelper v1.1.10-0.20220626161202-f424f073be61
 	github.com/andersfylling/snowflake/v5 v5.0.1
-	github.com/klauspost/compress v1.15.14
+	github.com/klauspost/compress v1.15.15
 	github.com/segmentio/encoding v0.3.6
 	github.com/unxcepted/iso8601/v2 v2.0.1
 	github.com/unxcepted/websocket v1.9.0
 	github.com/valyala/fasthttp v1.44.0
 	go.uber.org/atomic v1.10.0
 	golang.org/x/crypto v0.5.0
-	golang.org/x/exp v0.0.0-20230108222341-4b8118a2686a
+	golang.org/x/exp v0.0.0-20230131160201-f062dba9d201
 )
 
 require (
