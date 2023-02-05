@@ -107,12 +107,6 @@ func (i *Interaction) Delete() error {
 	return http.DoNoResp(req)
 }
 
-func (i *Interaction) ACK() error {
-	custom := i.CustomReply()
-	custom.Type(PongCallback)
-	return custom.Execute()
-}
-
 func (i *Interaction) SendMessageReply() ReplyBuilder {
 	bl := &interactionBuilder[ReplyBuilder]{t: ChannelMessageWithSourceCallback, i: i}
 	bl.BaseMessageBuilder = &builders.MessageBuilder[ReplyBuilder]{B: bl}
@@ -146,46 +140,46 @@ func (i *Interaction) CreateFollowUp() FollowUpCreateBuilder {
 	return bl
 }
 
-func (x *Interaction) CreateModal(id string, title string) *ModalBuilder {
-	return NewModalBuilder(x, id, title)
+func (i *Interaction) CreateModal(id string, title string) *ModalBuilder {
+	return NewModalBuilder(i, id, title)
 }
 
-func (i Interaction) IsCommand() bool {
+func (i *Interaction) IsCommand() bool {
 	if i.Type == CommandAction {
 		return true
 	}
 	return false
 }
 
-func (i Interaction) IsMessageComponent() bool {
+func (i *Interaction) IsMessageComponent() bool {
 	if i.Type == MessageComponentAction {
 		return true
 	}
 	return false
 }
 
-func (i Interaction) IsModalSubmit() bool {
+func (i *Interaction) IsModalSubmit() bool {
 	if i.Type == ModalSubmitAction {
 		return true
 	}
 	return false
 }
 
-func (i Interaction) IsAutocomplete() bool {
+func (i *Interaction) IsAutocomplete() bool {
 	if i.Type == AutocompleteAction {
 		return true
 	}
 	return false
 }
 
-func (i Interaction) IsButton() bool {
+func (i *Interaction) IsButton() bool {
 	if i.Data.ComponentType == components.TypeButton {
 		return true
 	}
 	return false
 }
 
-func (i Interaction) IsSelectMenu() bool {
+func (i *Interaction) IsSelectMenu() bool {
 	if i.Data.ComponentType == components.TypeSelectMenu {
 		return true
 	}
@@ -193,7 +187,7 @@ func (i Interaction) IsSelectMenu() bool {
 }
 
 // UserID might be present (or not) in multiple places - this method gets it wherever it exists.
-func (i Interaction) UserID() snowflake.Snowflake {
+func (i *Interaction) UserID() snowflake.Snowflake {
 	if !i.User.ID.IsZero() {
 		return i.User.ID
 	}
@@ -203,7 +197,7 @@ func (i Interaction) UserID() snowflake.Snowflake {
 	return i.Member.User.ID
 }
 
-func (i Interaction) InGuild() bool {
+func (i *Interaction) InGuild() bool {
 	if i.GuildID.Valid() {
 		return true
 	}
