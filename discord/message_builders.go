@@ -46,12 +46,14 @@ type BaseMessageBuilder[B any] interface {
 	File(f MessageFile) B
 	Files(f []MessageFile) B
 	KeepFiles(files []Attachment) B
+	AllowedMentions(allowed MessageAllowedMentions) B
 	DoNotKeepFiles() B
 
 	ClearEmbeds() B
 	ClearFiles() B
 	ClearContent() B
 	ClearComponents() B
+	ClearAllowedMentions() B
 
 	Raw() MessageCreate
 	Builder() B

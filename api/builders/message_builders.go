@@ -104,6 +104,19 @@ type MessageBuilder[B any] struct {
 	attachmentsDisabled bool
 }
 
+func (m *MessageBuilder[B]) AllowedMentions(allowed discord.MessageAllowedMentions) B {
+	if allowed.Parse == nil {
+		allowed.Parse = []string{}
+	}
+	m.Create.AllowedMentions = &allowed
+	return m.B
+}
+
+func (m *MessageBuilder[B]) ClearAllowedMentions() B {
+	m.Create.AllowedMentions = nil
+	return m.B
+}
+
 func (m *MessageBuilder[B]) ActionRow(items ...components.ActionRowItem) B {
 	if m.Create.Components == nil {
 		m.Create.Components = new([]components.Component)

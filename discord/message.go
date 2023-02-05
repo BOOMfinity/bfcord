@@ -260,6 +260,18 @@ type MessageCreate struct {
 	Files            *[]MessageFile          `json:"-"`
 	Attachments      *[]Attachment           `json:"attachments,omitempty"`
 	Components       *[]components.Component `json:"components,omitempty"`
+	AllowedMentions  *MessageAllowedMentions `json:"allowed_mentions,omitempty"`
+}
+
+// MessageAllowedMentions
+//
+// Reference: https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mentions-structure
+type MessageAllowedMentions struct {
+	// Supported values: roles, users, everyone
+	Parse       []string       `json:"parse"`
+	Roles       []snowflake.ID `json:"roles,omitempty"`
+	Users       []snowflake.ID `json:"users,omitempty"`
+	RepliedUser bool           `json:"replied_user,omitempty"`
 }
 
 type ForumMessageCreate struct {
