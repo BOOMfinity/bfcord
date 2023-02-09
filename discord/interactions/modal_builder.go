@@ -28,6 +28,7 @@ func (x *ModalBuilder) Execute() error {
 	data := make(map[string]any)
 	rows := make([]map[string]any, len(x.items))
 	for i := range rows {
+		rows[i] = map[string]any{}
 		rows[i]["type"] = components.TypeActionRow
 		rows[i]["components"] = []*TextFieldData{x.items[i]}
 	}
