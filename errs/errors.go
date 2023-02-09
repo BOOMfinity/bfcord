@@ -15,6 +15,8 @@ var (
 	ResultMustBePointer = NewHTTPError("result must be a pointer")
 
 	HTTPUnauthorized = HTTPErrorWithCode(NewHTTPError("invalid credentials"), 401)
+
+	ModalValueNotFound = NewLibraryError("there is no modal component with given custom ID")
 )
 
 func IsNotFound(err error) bool {

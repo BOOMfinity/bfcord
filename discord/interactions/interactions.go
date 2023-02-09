@@ -3,6 +3,7 @@ package interactions
 import (
 	"fmt"
 	"github.com/BOOMfinity/bfcord/api/builders"
+	"github.com/BOOMfinity/bfcord/errs"
 
 	"github.com/BOOMfinity/bfcord/api"
 	"github.com/BOOMfinity/bfcord/slash"
@@ -70,6 +71,18 @@ func (i *Interaction) AutocompleteReply(choices []slash.Choice) error {
 	custom.Type(AutocompleteResultCallback)
 	custom.Data(ResponseData{Choices: &choices})
 	return custom.Execute()
+}
+
+func (i *Interaction) ModalValue(id string) (string, error) {
+	for _x := range i.Data.Components {
+		for _i := range i.Data.Components[_x].Components {
+			comp := i.Data.Components[_x].Components[_i]
+			if comp.CustomID == id {
+				return comp.Value, nil
+			}
+		}
+	}
+	return "", errs.ModalValueNotFound
 }
 
 func (i *Interaction) CustomReply() OriginalCustomBuilder {
