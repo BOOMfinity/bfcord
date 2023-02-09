@@ -2,8 +2,6 @@ package interactions
 
 import (
 	"fmt"
-	"math"
-
 	"github.com/BOOMfinity/bfcord/api"
 	"github.com/BOOMfinity/bfcord/discord/components"
 	"github.com/segmentio/encoding/json"
@@ -28,26 +26,10 @@ func (x *ModalBuilder) Execute() error {
 	req.SetRequestURI(fmt.Sprintf(api.FullApiUrl+"/interactions/%v/%v/callback", x.i.ID.String(), x.i.Token))
 	req.Header.SetMethod(fasthttp.MethodPost)
 	data := make(map[string]any)
-	index := 0
-	rows := make([]map[string]any, int(math.Ceil(float64(len(x.items))/5)))
-	row := make([]*TextFieldData, 0, 5)
-	for i := 0; i < len(x.items); i++ {
-		if rows[index] == nil {
-			rows[index] = make(map[string]any, 2)
-		}
-		rows[index]["type"] = components.TypeActionRow
-		field := x.items[i]
-		if len(row) < 4 {
-			row = append(row, field)
-			continue
-		}
-		rows[index]["components"] = row
-		row = row[:0]
-		index++
-		i--
-	}
-	if len(row) != 0 {
-		rows[index]["components"] = row
+	rows := make([]map[string]any, len(x.items))
+	for i := range rows {
+		rows[i]["type"] = components.TypeActionRow
+		rows[i]["components"] = []*TextFieldData{x.items[i]}
 	}
 	modalData := make(map[string]any)
 	data["type"] = ModalCallback
