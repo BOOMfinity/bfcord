@@ -134,11 +134,18 @@ func (m *MessageBuilder[B]) AutoActionRows(items ...components.ActionRowItem) B 
 	row := components.NewActionRow()
 	for i := range items {
 		item := items[i]
+		// Row can contain 5 buttons or one select menu
 		if row.Size() == 5 || (item.Type() == components.TypeSelectMenu && row.Size() > 0) {
 			*m.Create.Components = append(*m.Create.Components, row.ToComponent())
 			row = components.NewActionRow()
 		}
 		row.Add(item.ToComponent())
+
+		// If current item is select menu, row cannot fit more components, so we create a new one for potential next items
+		if item.Type() == components.TypeSelectMenu {
+			*m.Create.Components = append(*m.Create.Components, row.ToComponent())
+			row = components.NewActionRow()
+		}
 	}
 	if row.Size() > 0 {
 		*m.Create.Components = append(*m.Create.Components, row.ToComponent())
