@@ -13,8 +13,9 @@ import (
 type User struct {
 	// The user's banner hash, not url!
 	Banner        string `json:"banner,omitempty"`
-	Username      string `json:"username"`
-	Discriminator string `json:"discriminator"`
+	Username      string `json:"username"`      // new username, or old without #
+	Discriminator string `json:"discriminator"` // 0 if user has a new username, might be null somewhat later as per docs
+	GlobalName    string `json:"global_name"`   // new display name
 	// Discord user's avatar HASH, NOT URL!
 	//
 	// To generate URL use User.AvatarURL method.
@@ -52,7 +53,16 @@ func (v User) IsPartial() bool {
 	return false
 }
 
+// Tag now returns a display name if user has set one, new username or old one with discriminator otherwise
 func (v User) Tag() string {
+	if v.GlobalName != "" {
+		return v.GlobalName
+	}
+
+	if v.Discriminator == "0" {
+		return v.Username
+	}
+
 	return v.Username + "#" + v.Discriminator
 }
 
