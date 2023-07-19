@@ -151,7 +151,7 @@ type ChannelUpdate struct {
 	UserLimit              *uint16                  `json:"user_limit,omitempty"`
 	ParentID               *snowflake.ID            `json:"parent_id,omitempty"`
 	DefaultArchiveDuration *ThreadArchiveDuration   `json:"default_archive_duration,omitempty"`
-	Overwrites             *[]permissions.Overwrite `json:"overwrites,omitempty"`
+	Overwrites             *[]permissions.Overwrite `json:"permission_overwrites,omitempty"`
 
 	Archived            *bool                  `json:"archived,omitempty"`
 	AutoArchiveDuration *ThreadArchiveDuration `json:"auto_archive_duration,omitempty"`
