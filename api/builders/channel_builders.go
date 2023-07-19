@@ -155,7 +155,7 @@ func (c *ChannelBuilder[B]) Execute(api discord.ClientQuery, reason ...string) (
 		}
 	} else {
 		// edit
-		ch, err = ll.UpdateChannel(c.Guild, c.Data)
+		ch, err = ll.UpdateChannel(c.ID, c.Data)
 		if err != nil {
 			return
 		}
