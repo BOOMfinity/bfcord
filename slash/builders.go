@@ -8,7 +8,7 @@ import (
 	"github.com/andersfylling/snowflake/v5"
 	"github.com/segmentio/encoding/json"
 	"github.com/valyala/fasthttp"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type OptionBuilder interface {
@@ -200,18 +200,14 @@ func (c *commandBuilder[B]) DefaultMemberPermissions(perms permissions.Permissio
 
 func (c *commandBuilder[B]) Option(bl OptionBuilder) B {
 	c.cmd.Options = append(c.cmd.Options, bl.Build())
-	slices.SortStableFunc(c.cmd.Options, func(a, b Option) bool {
-		var (
-			valA = 0
-			valB = 0
-		)
-		if a.Required {
-			valA = 1
+	slices.SortStableFunc(c.cmd.Options, func(a, b Option) int {
+		if a.Required && !b.Required {
+			return 1
 		}
-		if b.Required {
-			valB = 1
+		if b.Required && !a.Required {
+			return -1
 		}
-		return valA > valB
+		return 0
 	})
 	return c.b
 }
@@ -241,18 +237,14 @@ func (o *optionBuilder[B, A]) Import(opt Option) B {
 
 func (o *optionBuilder[B, A]) Option(bl OptionBuilder) B {
 	o.option.Options = append(o.option.Options, bl.Build())
-	slices.SortStableFunc(o.option.Options, func(a, b Option) bool {
-		var (
-			valA = 0
-			valB = 0
-		)
-		if a.Required {
-			valA = 1
+	slices.SortStableFunc(o.option.Options, func(a, b Option) int {
+		if a.Required && !b.Required {
+			return 1
 		}
-		if b.Required {
-			valB = 1
+		if b.Required && !a.Required {
+			return -1
 		}
-		return valA > valB
+		return 0
 	})
 	return o.b
 }

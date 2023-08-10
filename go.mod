@@ -1,9 +1,11 @@
 module github.com/BOOMfinity/bfcord
 
-go 1.18
+go 1.21
+
+toolchain go1.21.0
 
 require (
-	github.com/BOOMfinity/go-utils v0.9.1
+	github.com/BOOMfinity/go-utils v0.9.2
 	github.com/BOOMfinity/golog v1.0.6
 	github.com/BOOMfinity/wshelper v1.2.0
 	github.com/andersfylling/snowflake/v5 v5.0.1
@@ -14,7 +16,6 @@ require (
 	github.com/valyala/fasthttp v1.48.0
 	go.uber.org/atomic v1.11.0
 	golang.org/x/crypto v0.12.0
-	golang.org/x/exp v0.0.0-20230810033253-352e893a4cad
 )
 
 require (

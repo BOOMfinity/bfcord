@@ -4,7 +4,7 @@ import (
 	"github.com/BOOMfinity/bfcord/discord/permissions"
 	"github.com/BOOMfinity/go-utils/inlineif"
 	"github.com/andersfylling/snowflake/v5"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // Role
