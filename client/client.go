@@ -268,12 +268,15 @@ func (v *client) Log() golog.Logger {
 
 // New creates a client with default settings	 (automatic sharding, default cache). To override these settings, use Options
 func New(token string, opt ...Option) (Client, error) {
-	def := &options{AutoSharding: true, Logger: golog.New("bfcord"), BlockUntilPrefetch: true, Timeout: 45 * time.Second, Store: cache.NewDefaultStore()}
-	gtwLog := def.Logger.Module("gateway")
-	def.GatewayOptions = append(def.GatewayOptions, gateway.WithLogger(gtwLog), gateway.WithApiClient(api.NewClient(token, api.WithLogger(gtwLog.Module("api")))))
+	def := &options{AutoSharding: true, BlockUntilPrefetch: true, Timeout: 45 * time.Second, Store: cache.NewDefaultStore()}
 	for i := range opt {
 		opt[i](def)
 	}
+	if def.Logger == nil {
+		def.Logger = golog.New("bfcord")
+	}
+	gtwLog := def.Logger.Module("gateway")
+	def.GatewayOptions = append(def.GatewayOptions, gateway.WithLogger(gtwLog), gateway.WithApiClient(api.NewClient(token, api.WithLogger(gtwLog.Module("api")))))
 	c := new(client)
 	c.token = token
 	c.logger = def.Logger
