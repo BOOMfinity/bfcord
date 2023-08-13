@@ -99,6 +99,27 @@ func (rs RoleSlice) HighestWithin(member *Member) (highest *Role) {
 	return
 }
 
+func (rs RoleSlice) ColorOf(member *Member) int {
+	if len(rs) == 0 {
+		return 0
+	}
+
+	var highest *Role
+	for i := range rs {
+		if slices.Contains(member.Roles, rs[i].ID) {
+			if highest == nil || (rs[i].ComparePosition(highest) > 0 && rs[i].Color != 0) {
+				highest = &rs[i]
+			}
+		}
+	}
+
+	if highest == nil {
+		return 0
+	}
+
+	return highest.Color
+}
+
 func (rs RoleSlice) Find(id snowflake.ID) *Role {
 	index := slices.IndexFunc(rs, func(r Role) bool {
 		return r.ID == id
