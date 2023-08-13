@@ -55,7 +55,7 @@ func (mr memberResolver) PermissionsIn(channel snowflake.ID) (perm permissions.P
 	}
 	ch, err := mr.bot.Channel(channel).Get()
 	if err != nil {
-		return 0, fmt.Errorf("failed to get guild member: %w", err)
+		return 0, fmt.Errorf("failed to get guild channel: %w", err)
 	}
 	return discord.ChannelPermissions(*guild, member.Member, ch.Overwrites), nil
 }
