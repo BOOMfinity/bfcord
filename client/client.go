@@ -189,6 +189,9 @@ func (v *client) AvgLatency() uint16 {
 		all = append(all, v.shards[i].Latency())
 	}
 	v.m.RUnlock()
+	if len(all) == 0 {
+		return 0
+	}
 	return uint16(slices.Sum(all) / len(all))
 }
 
