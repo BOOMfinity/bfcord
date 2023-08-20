@@ -1,10 +1,13 @@
 package discord
 
 import (
+	"fmt"
+	"github.com/BOOMfinity/bfcord/api/cdn"
 	"github.com/BOOMfinity/bfcord/discord/permissions"
 	"github.com/BOOMfinity/go-utils/inlineif"
 	"github.com/andersfylling/snowflake/v5"
 	"slices"
+	"strconv"
 )
 
 // Role
@@ -128,4 +131,16 @@ func (rs RoleSlice) Find(id snowflake.ID) *Role {
 		return nil
 	}
 	return &rs[index]
+}
+
+// IconURL returns a URL of Role icon.
+//
+// Size can be any power of two between 16 and 4096 (use constants from cdn package, or 0 for default).
+func (r Role) IconURL(format cdn.ImageFormat, size cdn.ImageSize) string {
+	url := fmt.Sprintf("%v/role-icons/%v/%v.%v", cdn.Url, r.ID.String(), r.Icon, format)
+	if size != 0 {
+		url += "?size=" + strconv.Itoa(int(size))
+	}
+
+	return url
 }
