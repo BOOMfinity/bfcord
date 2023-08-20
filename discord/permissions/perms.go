@@ -102,6 +102,10 @@ const (
 	SendMessagesInThreads
 	UseEmbeddedActivities
 	ModerateMembers
+	ViewCreatorMonetizationAnalytics
+	UseSoundboard
+	UseExternalSounds
+	SendVoiceMessages
 
 	All = CreateInstantInvite |
 		KickMembers |
@@ -143,51 +147,59 @@ const (
 		UseExternalStickers |
 		SendMessagesInThreads |
 		UseEmbeddedActivities |
-		ModerateMembers
+		ModerateMembers |
+		ViewCreatorMonetizationAnalytics |
+		UseSoundboard |
+		UseExternalSounds |
+		SendVoiceMessages
 )
 
 var permissions = map[Permission]string{
-	CreateInstantInvite:     "createInstantInvite",
-	KickMembers:             "kickMembers",
-	BanMembers:              "banMembers",
-	Administrator:           "administrator",
-	ManageChannels:          "manageChannels",
-	ManageGuild:             "manageGuild",
-	AddReactions:            "addReactions",
-	ViewAuditLog:            "viewAuditLog",
-	PrioritySpeaker:         "prioritySpeaker",
-	Stream:                  "stream",
-	ViewChannel:             "viewChannel",
-	SendMessages:            "sendMessages",
-	SendTTSMessages:         "sendTTSMessages",
-	ManageMessages:          "manageMessages",
-	EmbedLinks:              "embedLinks",
-	AttachFiles:             "attachFiles",
-	ReadMessageHistory:      "readMessageHistory",
-	MentionEveryone:         "mentionEveryone",
-	UseExternalEmojis:       "useExternalEmojis",
-	ViewGuildInsights:       "viewGuildInsights",
-	Connect:                 "connect",
-	Speak:                   "speak",
-	MuteMembers:             "muteMembers",
-	DeafenMembers:           "deafenMembers",
-	MoveMembers:             "moveMembers",
-	UseVAD:                  "useVAD",
-	ChangeNickname:          "changeNickname",
-	ManageNicknames:         "manageNicknames",
-	ManageRoles:             "manageRoles",
-	ManageWebhooks:          "manageWebhooks",
-	ManageEmojisAndStickers: "manageEmojisAndStickers",
-	UseApplicationCommands:  "useApplicationCommands",
-	RequestToSpeak:          "requestToSpeak",
-	ManageEvents:            "manageEvents",
-	ManageThreads:           "manageThreads",
-	CreatePublicThreads:     "createPublicThreads",
-	CreatePrivateThreads:    "createPrivateThreads",
-	UseExternalStickers:     "useExternalStickers",
-	SendMessagesInThreads:   "sendMessagesInThreads",
-	UseEmbeddedActivities:   "useEmbeddedActivities",
-	ModerateMembers:         "moderateMembers",
+	CreateInstantInvite:              "createInstantInvite",
+	KickMembers:                      "kickMembers",
+	BanMembers:                       "banMembers",
+	Administrator:                    "administrator",
+	ManageChannels:                   "manageChannels",
+	ManageGuild:                      "manageGuild",
+	AddReactions:                     "addReactions",
+	ViewAuditLog:                     "viewAuditLog",
+	PrioritySpeaker:                  "prioritySpeaker",
+	Stream:                           "stream",
+	ViewChannel:                      "viewChannel",
+	SendMessages:                     "sendMessages",
+	SendTTSMessages:                  "sendTTSMessages",
+	ManageMessages:                   "manageMessages",
+	EmbedLinks:                       "embedLinks",
+	AttachFiles:                      "attachFiles",
+	ReadMessageHistory:               "readMessageHistory",
+	MentionEveryone:                  "mentionEveryone",
+	UseExternalEmojis:                "useExternalEmojis",
+	ViewGuildInsights:                "viewGuildInsights",
+	Connect:                          "connect",
+	Speak:                            "speak",
+	MuteMembers:                      "muteMembers",
+	DeafenMembers:                    "deafenMembers",
+	MoveMembers:                      "moveMembers",
+	UseVAD:                           "useVAD",
+	ChangeNickname:                   "changeNickname",
+	ManageNicknames:                  "manageNicknames",
+	ManageRoles:                      "manageRoles",
+	ManageWebhooks:                   "manageWebhooks",
+	ManageEmojisAndStickers:          "manageEmojisAndStickers",
+	UseApplicationCommands:           "useApplicationCommands",
+	RequestToSpeak:                   "requestToSpeak",
+	ManageEvents:                     "manageEvents",
+	ManageThreads:                    "manageThreads",
+	CreatePublicThreads:              "createPublicThreads",
+	CreatePrivateThreads:             "createPrivateThreads",
+	UseExternalStickers:              "useExternalStickers",
+	SendMessagesInThreads:            "sendMessagesInThreads",
+	UseEmbeddedActivities:            "useEmbeddedActivities",
+	ModerateMembers:                  "moderateMembers",
+	ViewCreatorMonetizationAnalytics: "viewCreatorMonetizationAnalytics",
+	UseSoundboard:                    "useSoundboard",
+	UseExternalSounds:                "useExternalSounds",
+	SendVoiceMessages:                "sendVoiceMessages",
 }
 
 // String returns string representation of permission
