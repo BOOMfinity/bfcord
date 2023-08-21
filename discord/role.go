@@ -19,6 +19,7 @@ type Role struct {
 	UnicodeEmoji string                 `json:"unicode_emoji,omitempty"`
 	Permissions  permissions.Permission `json:"permissions"`
 	Tags         RoleTags               `json:"tags,omitempty"`
+	Flags        Flag                   `json:"flags,omitempty"`
 	ID           snowflake.ID           `json:"id"`
 	Color        int                    `json:"color"`
 	Position     int                    `json:"position"`
@@ -143,4 +144,29 @@ func (r Role) IconURL(format cdn.ImageFormat, size cdn.ImageSize) string {
 	}
 
 	return url
+}
+
+type Flag uint64
+
+const (
+	InPrompt Flag = 1 << iota
+)
+
+var flags = map[Flag]string{}
+
+func (r Flag) Serialize() (data map[Flag]bool) {
+	data = make(map[Flag]bool, len(flags))
+	for perm := range flags {
+		data[perm] = r.Has(perm)
+	}
+	return
+}
+
+func (r Flag) Has(flag Flag) bool {
+	return r&flag == flag
+}
+
+// String returns string representation of flag
+func (r Flag) String() string {
+	return flags[r]
 }
