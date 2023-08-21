@@ -152,7 +152,9 @@ const (
 	InPrompt Flag = 1 << iota
 )
 
-var flags = map[Flag]string{}
+var flags = map[Flag]string{
+	InPrompt: "inPrompt",
+}
 
 func (r Flag) Serialize() (data map[Flag]bool) {
 	data = make(map[Flag]bool, len(flags))
