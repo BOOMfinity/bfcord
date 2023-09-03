@@ -13,17 +13,17 @@ require (
 	github.com/segmentio/encoding v0.3.6
 	github.com/unxcepted/iso8601/v2 v2.0.1
 	github.com/unxcepted/websocket v1.9.0
-	github.com/valyala/fasthttp v1.48.0
+	github.com/valyala/fasthttp v1.49.0
 	go.uber.org/atomic v1.11.0
 	golang.org/x/crypto v0.12.0
-	golang.org/x/exp v0.0.0-20230811145659-89c5cff77bcb
+	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/segmentio/ksuid v1.0.4 // indirect
-	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 )

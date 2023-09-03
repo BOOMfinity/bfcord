@@ -18,6 +18,8 @@ func (v *SafeMap[K, V]) UnsafeGet(key K) V {
 }
 
 func (v *SafeMap[K, V]) Get(key K) (value V, ok bool) {
+	v.m.RLock()
+	defer v.m.RUnlock()
 	if !v.Has(key) {
 		return
 	}
@@ -154,6 +156,17 @@ func (v *SafeMap[K, V]) Size() int {
 	v.m.RLock()
 	defer v.m.RUnlock()
 	return len(v.data)
+}
+
+func (v *SafeMap[K, V]) Update(key K, fn func(value V) V) (ok bool) {
+	v.m.Lock()
+	defer v.m.Unlock()
+	index, ok := v.indexes[key]
+	if !ok {
+		return false
+	}
+	v.data[index] = fn(v.data[index])
+	return true
 }
 
 func NewSafeMap[K comparable, V any](prealloc int) *SafeMap[K, V] {

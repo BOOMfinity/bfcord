@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+
 	"github.com/BOOMfinity/go-utils/sets"
 
 	"github.com/BOOMfinity/bfcord/discord"
@@ -531,6 +532,10 @@ func (v *client) handle(data *gateway.Payload) {
 			})
 		case events.GuildMemberAdd:
 			if v.Store() != nil {
+				v.Store().Guilds().Update(ev.GuildID, func(value discord.Guild) discord.Guild {
+					value.MemberCount += 1
+					return value
+				})
 				v.Store().Members().UnsafeGet(ev.GuildID).Set(ev.UserID, ev.Member)
 			}
 			Execute(v.manager, func(_h GuildMemberAddEvent) {
@@ -545,6 +550,10 @@ func (v *client) handle(data *gateway.Payload) {
 		}
 		var old *discord.Member
 		if v.Store() != nil {
+			v.Store().Guilds().Update(ev.GuildID, func(value discord.Guild) discord.Guild {
+				value.MemberCount -= 1
+				return value
+			})
 			if store, ok := v.Store().Members().Get(ev.GuildID); ok {
 				if member, ok := store.Get(ev.User.ID); ok {
 					old = &member

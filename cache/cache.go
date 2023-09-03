@@ -36,6 +36,7 @@ type SafeStoreCustom[K comparable, V any] interface {
 	Has(key K) bool
 	Set(key K, value V)
 	Delete(key K) bool
+	Update(key K, fn func(value V) V) (ok bool)
 	Size() int
 }
 
