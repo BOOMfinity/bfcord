@@ -91,6 +91,43 @@ func (v GuildQuery) Members(limit int, after snowflake.ID) (members []discord.Me
 	return
 }
 
+func (v GuildQuery) Bans(limit int, after snowflake.ID) (bans []discord.Ban, err error) {
+	var _limit uint16
+	var _bans []discord.Ban
+	for {
+		if limit > 1000 {
+			_limit = 1000
+		}
+		if limit == -1 {
+			_limit = 1000
+		} else if (len(bans) + 1000) > limit {
+			_limit = uint16(limit - len(bans))
+		}
+		params := url.Values{}
+		if limit > 0 {
+			params.Set("limit", fmt.Sprint(_limit))
+		}
+		if after.Valid() {
+			params.Set("after", after.String())
+		}
+		req := v.api.New(true)
+		if len(params) != 0 {
+			req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/bans?%v", FullApiUrl, v.guild, params.Encode()))
+		} else {
+			req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/bans", FullApiUrl, v.guild))
+		}
+		err = v.api.DoResult(req, &bans)
+		if len(bans) > 0 {
+			after = bans[len(bans)-1].User.ID
+		}
+		bans = append(bans, _bans...)
+		if len(bans) < 1000 || len(bans) == limit {
+			break
+		}
+	}
+	return
+}
+
 func (v GuildQuery) Get() (guild *discord.Guild, err error) {
 	req := v.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v", FullApiUrl, v.guild))

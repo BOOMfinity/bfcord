@@ -169,6 +169,7 @@ type GuildQuery interface {
 	// limit variable has no upper value, so if you set it to more than 1000 (theoretically Discord API limit) the library will just make appropriate number of requests.
 	// if limit is set to -1, bfcord will try to fetch all guild members.
 	Members(limit int, after snowflake.ID) (members []MemberWithUser, err error)
+	Bans(limit int, after snowflake.ID) (bans []Ban, err error)
 }
 
 type ClientQuery interface {
