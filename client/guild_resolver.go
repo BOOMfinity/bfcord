@@ -32,6 +32,10 @@ func (gr guildResolver) Member(id snowflake.ID) discord.GuildMemberQuery {
 	return resolver
 }
 
+func (gr guildResolver) Me() discord.GuildMemberQuery {
+	return gr.Member(gr.bot.current)
+}
+
 func (gr guildResolver) Members(limit int, after snowflake.ID) (members []discord.MemberWithUser, err error) {
 	members, err = gr.bot.Guild(gr.ID()).Members(limit, after)
 	if err != nil {

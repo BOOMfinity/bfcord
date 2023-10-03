@@ -201,6 +201,16 @@ func (v GuildQuery) Member(id snowflake.ID) discord.GuildMemberQuery {
 	return NewMemberQuery(v.api, v.guild, id)
 }
 
+func (v GuildQuery) Me() discord.GuildMemberQuery {
+	c, err := v.api.CurrentUser()
+	if err != nil {
+		v.api.logger.Error().Send("[api-only] failed to fetch current user: %v", err.Error())
+		return NewMemberQuery(v.api, v.guild, 0)
+	}
+
+	return NewMemberQuery(v.api, v.guild, c.ID)
+}
+
 func (v GuildQuery) Search(query string, limit uint16) (members []discord.MemberWithUser, err error) {
 	req := v.api.New(true)
 	params := url.Values{}

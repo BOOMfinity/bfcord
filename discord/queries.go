@@ -156,6 +156,7 @@ type GuildQuery interface {
 	UpdateChannelPositions(positions *GuildChannelPositionsBuilder) (err error)
 	ActiveThreads() (threads []Channel, err error)
 	Member(id snowflake.ID) GuildMemberQuery
+	Me() GuildMemberQuery
 	Search(query string, limit uint16) (members []MemberWithUser, err error)
 	SetCurrentNick(nick string) (err error)
 	Roles() (roles RoleSlice, err error)
