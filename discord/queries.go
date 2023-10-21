@@ -146,11 +146,21 @@ type RoleQuery interface {
 	Delete() error
 }
 
+type EmojiQuery interface {
+	QueryOptions[EmojiQuery]
+	List() (emojis []Emoji, err error)
+	Delete(id snowflake.ID) error
+	Get(id snowflake.ID) (emoji *Emoji, err error)
+	Guild() snowflake.ID
+	// TODO: create / edit
+}
+
 type GuildQuery interface {
 	QueryOptions[GuildQuery]
 	Get() (guild *Guild, err error)
 	Delete() (err error)
 	Channels() (channels []Channel, err error)
+	Emojis() EmojiQuery
 	CreateChannel(name string) GuildChannelBuilder
 	Edit() GuildBuilder
 	UpdateChannelPositions(positions *GuildChannelPositionsBuilder) (err error)

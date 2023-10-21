@@ -11,15 +11,15 @@ import (
 var _ = (Store)(&DefaultStore{})
 
 type Store interface {
-	Guilds() SafeStore[discord.Guild]
-	Members() SafeStore[SafeStore[discord.Member]]
-	Channels() SafeStore[SafeStore[discord.Channel]]
-	Reactions() SafeStore[SafeStoreCustom[string, discord.MessageReaction]]
-	Presences() SafeStore[SafeStore[discord.BasePresence]]
-	Messages() SafeStore[sets.Set[snowflake.ID, discord.BaseMessage]]
-	Private() SafeStore[discord.Channel]
-	Users() SafeStore[discord.User]
-	VoiceStates() SafeStore[SafeStore[discord.VoiceState]]
+	Guilds() SafeStoreCustom[snowflake.ID, discord.Guild]
+	Members() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Member]]
+	Channels() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Channel]]
+	Reactions() SafeStoreCustom[snowflake.ID, SafeStoreCustom[string, discord.MessageReaction]]
+	Presences() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.BasePresence]]
+	Messages() SafeStoreCustom[snowflake.ID, sets.Set[snowflake.ID, discord.BaseMessage]]
+	Private() SafeStoreCustom[snowflake.ID, discord.Channel]
+	Users() SafeStoreCustom[snowflake.ID, discord.User]
+	VoiceStates() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.VoiceState]]
 	SetChannelGuild(channel, guild snowflake.ID)
 	ChannelGuild(channel snowflake.ID) snowflake.ID
 }
@@ -40,9 +40,7 @@ type SafeStoreCustom[K comparable, V any] interface {
 	Size() int
 }
 
-type SafeStore[V any] SafeStoreCustom[snowflake.ID, V]
-
-func newSafeStore[V any]() SafeStore[V] {
+func newSnowflakeStore[V any]() SafeStoreCustom[snowflake.ID, V] {
 	return newSafeStoreCustom[snowflake.ID, V]()
 }
 
@@ -56,69 +54,69 @@ func NewDefaultStore() *DefaultStore {
 	store.guilds = NewSafeMap[snowflake.ID, discord.Guild](0)
 	store.private = NewSafeMap[snowflake.ID, discord.Channel](0)
 	store.reactions = NewSafeMapWithInitializer[snowflake.ID, SafeStoreCustom[string, discord.MessageReaction]](0, newSafeStoreCustom[string, discord.MessageReaction])
-	store.members = NewSafeMapWithInitializer[snowflake.ID, SafeStore[discord.Member]](0, newSafeStore[discord.Member])
-	store.channels = NewSafeMapWithInitializer[snowflake.ID, SafeStore[discord.Channel]](0, newSafeStore[discord.Channel])
-	store.presences = NewSafeMapWithInitializer[snowflake.ID, SafeStore[discord.BasePresence]](0, newSafeStore[discord.BasePresence])
+	store.members = NewSafeMapWithInitializer[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Member]](0, newSnowflakeStore[discord.Member])
+	store.channels = NewSafeMapWithInitializer[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Channel]](0, newSnowflakeStore[discord.Channel])
+	store.presences = NewSafeMapWithInitializer[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.BasePresence]](0, newSnowflakeStore[discord.BasePresence])
 	store.messages = NewSafeMapWithInitializer[snowflake.ID, sets.Set[snowflake.ID, discord.BaseMessage]](0, func() sets.Set[snowflake.ID, discord.BaseMessage] {
 		return sets.NewLimitedCustomSet[snowflake.ID, discord.BaseMessage](func(item discord.BaseMessage) snowflake.ID {
 			return item.ID
 		}, 100)
 	})
 	store.aliases = map[snowflake.Snowflake]snowflake.Snowflake{}
-	store.voiceStates = NewSafeMapWithInitializer[snowflake.ID, SafeStore[discord.VoiceState]](0, newSafeStore[discord.VoiceState])
+	store.voiceStates = NewSafeMapWithInitializer[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.VoiceState]](0, newSnowflakeStore[discord.VoiceState])
 
 	return store
 }
 
 type DefaultStore struct {
-	users       SafeStore[discord.User]
-	guilds      SafeStore[discord.Guild]
-	private     SafeStore[discord.Channel]
-	reactions   SafeStore[SafeStoreCustom[string, discord.MessageReaction]]
-	roles       SafeStore[SafeStore[discord.Role]]
-	members     SafeStore[SafeStore[discord.Member]]
-	channels    SafeStore[SafeStore[discord.Channel]]
-	presences   SafeStore[SafeStore[discord.BasePresence]]
-	voiceStates SafeStore[SafeStore[discord.VoiceState]]
-	messages    SafeStore[sets.Set[snowflake.ID, discord.BaseMessage]]
-	emojis      SafeStore[SafeStore[discord.Emoji]]
-	aliases     map[snowflake.ID]snowflake.ID
-	m           sync.RWMutex
+	users     SafeStoreCustom[snowflake.ID, discord.User]
+	guilds    SafeStoreCustom[snowflake.ID, discord.Guild]
+	private   SafeStoreCustom[snowflake.ID, discord.Channel]
+	reactions SafeStoreCustom[snowflake.ID, SafeStoreCustom[string, discord.MessageReaction]]
+	// roles       SafeStore[SafeStore[discord.Role]]
+	members     SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Member]]
+	channels    SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Channel]]
+	presences   SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.BasePresence]]
+	voiceStates SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.VoiceState]]
+	messages    SafeStoreCustom[snowflake.ID, sets.Set[snowflake.ID, discord.BaseMessage]]
+	// emojis      SafeStore[SafeStore[discord.Emoji]]
+	aliases map[snowflake.ID]snowflake.ID
+	m       sync.RWMutex
 }
 
-func (d *DefaultStore) Messages() SafeStore[sets.Set[snowflake.ID, discord.BaseMessage]] {
+func (d *DefaultStore) Messages() SafeStoreCustom[snowflake.ID, sets.Set[snowflake.ID, discord.BaseMessage]] {
 	return d.messages
 }
 
-func (d *DefaultStore) VoiceStates() SafeStore[SafeStore[discord.VoiceState]] {
+func (d *DefaultStore) VoiceStates() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.VoiceState]] {
 	return d.voiceStates
 }
 
-func (d *DefaultStore) Reactions() SafeStore[SafeStoreCustom[string, discord.MessageReaction]] {
+func (d *DefaultStore) Reactions() SafeStoreCustom[snowflake.ID, SafeStoreCustom[string, discord.MessageReaction]] {
 	return d.reactions
 }
 
-func (d *DefaultStore) Presences() SafeStore[SafeStore[discord.BasePresence]] {
+func (d *DefaultStore) Presences() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.BasePresence]] {
 	return d.presences
 }
 
-func (d *DefaultStore) Private() SafeStore[discord.Channel] {
+func (d *DefaultStore) Private() SafeStoreCustom[snowflake.ID, discord.Channel] {
 	return d.private
 }
 
-func (d *DefaultStore) Guilds() SafeStore[discord.Guild] {
+func (d *DefaultStore) Guilds() SafeStoreCustom[snowflake.ID, discord.Guild] {
 	return d.guilds
 }
 
-func (d *DefaultStore) Members() SafeStore[SafeStore[discord.Member]] {
+func (d *DefaultStore) Members() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Member]] {
 	return d.members
 }
 
-func (d *DefaultStore) Channels() SafeStore[SafeStore[discord.Channel]] {
+func (d *DefaultStore) Channels() SafeStoreCustom[snowflake.ID, SafeStoreCustom[snowflake.ID, discord.Channel]] {
 	return d.channels
 }
 
-func (d *DefaultStore) Users() SafeStore[discord.User] {
+func (d *DefaultStore) Users() SafeStoreCustom[snowflake.ID, discord.User] {
 	return d.users
 }
 

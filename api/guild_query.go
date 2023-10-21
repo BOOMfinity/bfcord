@@ -21,6 +21,10 @@ type GuildQuery struct {
 	guild snowflake.ID
 }
 
+func (v GuildQuery) Emojis() discord.EmojiQuery {
+	return NewEmojiQuery(v.api, v.ID())
+}
+
 func (v GuildQuery) UpdateRolePositions(roles discord.RolePositions) error {
 	req := v.api.New(true)
 	req.SetRequestURI(fmt.Sprintf("%v/guilds/%v/roles", FullApiUrl, v.guild))

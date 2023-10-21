@@ -36,6 +36,50 @@ func (gr guildResolver) Me() discord.GuildMemberQuery {
 	return gr.Member(gr.bot.current)
 }
 
+func (gr guildResolver) Roles() (roles discord.RoleSlice, err error) {
+	if !gr.ignoreCache && gr.bot.Store() != nil {
+		guild, _err := gr.bot.Guild(gr.ID()).NoAPI().Get()
+		if _err == nil && guild != nil {
+			return guild.Roles, nil
+		}
+		err = _err
+	}
+	if !gr.ignoreAPI {
+		guild, _err := gr.bot.Guild(gr.ID()).NoCache().Get()
+		if _err == nil && guild != nil {
+			return guild.Roles, nil
+		}
+		err = _err
+	}
+	if err == nil {
+		err = errs.ItemNotFound
+	}
+	return
+}
+
+func (gr guildResolver) Channels() (channels []discord.Channel, err error) {
+	if !gr.ignoreCache && gr.bot.Store() != nil {
+		if gr.bot.Store().Channels().Has(gr.ID()) {
+			return gr.bot.Store().Channels().UnsafeGet(gr.ID()).ToSlice(), nil
+		}
+	}
+	if !gr.ignoreAPI {
+		channels, err = gr.bot.API().Guild(gr.ID()).Channels()
+		if err == nil {
+			if gr.bot.Store() != nil {
+				for _, c := range channels {
+					gr.bot.Store().Channels().UnsafeGet(gr.ID()).Set(c.ID, c)
+				}
+			}
+			return
+		}
+	}
+	if err == nil {
+		err = errs.ItemNotFound
+	}
+	return
+}
+
 func (gr guildResolver) Members(limit int, after snowflake.ID) (members []discord.MemberWithUser, err error) {
 	members, err = gr.bot.Guild(gr.ID()).Members(limit, after)
 	if err != nil {
