@@ -1,265 +1,129 @@
 package discord
 
 import (
-	"fmt"
-	"github.com/BOOMfinity/bfcord/api/cdn"
-	"github.com/BOOMfinity/bfcord/discord/permissions"
-	"github.com/BOOMfinity/bfcord/internal/timeconv"
-	"github.com/BOOMfinity/go-utils/nullable"
 	"github.com/andersfylling/snowflake/v5"
-	"strconv"
+
+	"github.com/BOOMfinity/bfcord/utils"
 )
-
-type GuildWithData struct {
-	Members         []MemberWithUser      `json:"members"`
-	Channels        []Channel             `json:"channels"`
-	Threads         []Channel             `json:"threads"`
-	Presences       []Presence            `json:"presences"`
-	VoiceStates     []VoiceState          `json:"voice_states"`
-	StageInstances  []StageInstance       `json:"stage_instances"`
-	ScheduledEvents []GuildScheduledEvent `json:"guild_scheduled_events"`
-	Owner           User                  `json:"owner"`
-	Guild
-}
-
-func (g *GuildWithData) Patch() {
-	g.Guild.Patch()
-	for i := range g.Members {
-		g.Members[i].UserID = g.Members[i].User.ID
-		g.Members[i].GuildID = g.ID
-	}
-	for i := range g.Channels {
-		g.Channels[i].GuildID = g.ID
-	}
-	for i := range g.Threads {
-		g.Threads[i].GuildID = g.ID
-	}
-	for i := range g.Presences {
-		g.Presences[i].UserID = g.Presences[i].User.ID
-		g.Presences[i].GuildID = g.ID
-	}
-	for i := range g.StageInstances {
-		g.StageInstances[i].GuildID = g.ID
-	}
-	for i := range g.ScheduledEvents {
-		g.ScheduledEvents[i].GuildID = g.ID
-	}
-}
 
 type Guild struct {
-	JoinedAt                    timeconv.Timestamp         `json:"joined_at"`
-	Banner                      string                     `json:"banner"`
-	Name                        string                     `json:"name"`
-	IconHash                    string                     `json:"icon_hash"`
-	Splash                      string                     `json:"splash"`
-	VanityUrlCode               string                     `json:"vanity_url_code"`
-	PreferredLocale             string                     `json:"preferred_locale"`
-	DiscoverySplash             string                     `json:"discovery_splash"`
-	Icon                        string                     `json:"icon"`
-	Permissions                 string                     `json:"permissions"`
-	Description                 string                     `json:"description"`
-	Features                    []string                   `json:"features"`
-	Stickers                    []GuildSticker             `json:"stickers"`
-	Roles                       RoleSlice                  `json:"roles"`
-	Emojis                      []Emoji                    `json:"emojis"`
-	AFKTimeout                  timeconv.Seconds           `json:"afk_timeout"`
-	MFALevel                    int                        `json:"mfa_level"`
-	ApplicationID               snowflake.ID               `json:"application_id"`
-	SystemChannelID             snowflake.ID               `json:"system_channel_id"`
-	SystemChannelFlags          int                        `json:"system_channel_flags"`
-	RulesChannelID              snowflake.ID               `json:"rules_channel_id"`
-	OwnerID                     snowflake.ID               `json:"owner_id"`
-	PublicUpdatesChannelID      snowflake.ID               `json:"public_updates_channel_id"`
-	AFKChannelID                snowflake.ID               `json:"afk_channel_id"`
-	PremiumSubscriptionCount    int                        `json:"premium_subscription_count"`
-	MaxPresences                int                        `json:"max_presences"`
-	MaxMembers                  int                        `json:"max_members"`
-	WidgetChannelID             snowflake.ID               `json:"widget_channel_id"`
-	MaxVideoChannelUsers        int                        `json:"max_video_channel_users"`
-	MemberCount                 int                        `json:"member_count"`
-	ID                          snowflake.ID               `json:"id"`
-	PremiumTier                 GuildPremiumTier           `json:"premium_tier"`
-	ExplicitContentFilter       GuildExplicitContentFilter `json:"explicit_content_filter"`
-	Unavailable                 bool                       `json:"unavailable"`
-	DefaultMessageNotifications GuildDefaultNotifications  `json:"default_message_notifications"`
-	NSFWLevel                   GuildNSFWLevel             `json:"nsfw_level"`
-	VerificationLevel           GuildVerificationLevel     `json:"verification_level"`
-	WidgetEnabled               bool                       `json:"widget_enabled"`
-	PremiumProgressBarEnabled   bool                       `json:"premium_progress_bar_enabled"`
-	Large                       bool                       `json:"large"`
+	ID                          snowflake.ID                       `json:"id,omitempty"`
+	Name                        string                             `json:"name,omitempty"`
+	Icon                        string                             `json:"icon,omitempty"`
+	IconHash                    string                             `json:"icon_hash,omitempty"`
+	Splash                      string                             `json:"splash,omitempty"`
+	DiscoverySplash             string                             `json:"discovery_splash,omitempty"`
+	Owner                       bool                               `json:"owner,omitempty"`
+	OwnerID                     snowflake.ID                       `json:"owner_id,omitempty"`
+	Permissions                 Permission                         `json:"permissions,omitempty"`
+	Region                      string                             `json:"region,omitempty"`
+	AFKChannelID                snowflake.ID                       `json:"afk_channel_id,omitempty"`
+	AFKTimeout                  uint                               `json:"afk_timeout,omitempty"`
+	WidgetEnabled               bool                               `json:"widget_enabled,omitempty"`
+	WidgetChannelID             snowflake.ID                       `json:"widget_channel_id,omitempty"`
+	VerificationLevel           GuildVerificationLevel             `json:"verification_level,omitempty"`
+	DefaultMessageNotifications GuildMessageNotificationLevel      `json:"default_message_notifications,omitempty"`
+	ExplicitContentFilter       GuildExplicitContentFilter         `json:"explicit_content_filter,omitempty"`
+	Roles                       []Role                             `json:"roles,omitempty"`
+	Emojis                      []Emoji                            `json:"emojis,omitempty"`
+	Features                    []string                           `json:"features,omitempty"`
+	MFALevel                    GuildMFALevel                      `json:"mfa_level,omitempty"`
+	ApplicationID               snowflake.ID                       `json:"application_id,omitempty"`
+	SystemChannelID             snowflake.ID                       `json:"system_channel_id,omitempty"`
+	SystemChannelFlags          GuildSystemChannelFlag             `json:"system_channel_flags,omitempty"`
+	RulesChannelID              snowflake.ID                       `json:"rules_channel_id,omitempty"`
+	MaxPresences                uint                               `json:"max_presences,omitempty"`
+	MaxMembers                  uint                               `json:"max_members,omitempty"`
+	VanityURLCode               string                             `json:"vanity_url_code,omitempty"`
+	Description                 string                             `json:"description,omitempty"`
+	Banner                      string                             `json:"banner,omitempty"`
+	PremiumTier                 GuildPremiumTier                   `json:"premium_tier,omitempty"`
+	PremiumSubscriptionCount    uint                               `json:"premium_subscription_count,omitempty"`
+	PreferredLocale             string                             `json:"preferred_locale,omitempty"`
+	PublicUpdatesChannelID      snowflake.ID                       `json:"public_updates_channel_id,omitempty"`
+	MaxVideoChannelUsers        uint                               `json:"max_video_channel_users,omitempty"`
+	MaxStageVideoChannelUsers   uint                               `json:"max_stage_video_channel_users,omitempty"`
+	ApproximateMemberCount      uint                               `json:"approximate_member_count,omitempty"`
+	ApproximatePresenceCount    uint                               `json:"approximate_presence_count,omitempty"`
+	WelcomeScreen               utils.Nullable[GuildWelcomeScreen] `json:"welcome_screen,omitempty"`
+	NSFWLevel                   GuildNSFWLevel                     `json:"nsfw_level,omitempty"`
+	PremiumProgressBarEnabled   bool                               `json:"premium_progress_bar_enabled,omitempty"`
+	SafetyAlertsChannelID       snowflake.ID                       `json:"safety_alerts_channel_id,omitempty"`
+	// TODO: implements stickers
 }
 
-func (v Guild) Patch() {
-	for i := range v.Emojis {
-		v.Emojis[i].GuildID = v.ID
+func (g Guild) Role(id snowflake.ID) (r Role, _ bool) {
+	for _, r = range g.Roles {
+		if r.ID == id {
+			return r, true
+		}
 	}
-	for i := range v.Roles {
-		v.Roles[i].GuildID = v.ID
-	}
-	for i := range v.Stickers {
-		v.Stickers[i].GuildID = v.ID
-	}
-}
-
-func (v Guild) MemberPermissions(api ClientQuery, member snowflake.ID) (perm permissions.Permission, err error) {
-	if v.OwnerID == member {
-		return permissions.All, nil
-	}
-	return api.Guild(v.ID).Member(member).Permissions()
-}
-
-// IconURL returns a URL of Guild icon.
-//
-// Size can be any power of two between 16 and 4096 (use constants from cdn package, or 0 for default).
-func (v Guild) IconURL(format cdn.ImageFormat, size cdn.ImageSize) string {
-	url := fmt.Sprintf("%v/icons/%v/%v.%v", cdn.Url, v.ID.String(), v.Icon, format)
-	if size != 0 {
-		url += "?size=" + strconv.Itoa(int(size))
-	}
-
-	return url
-}
-
-type GuildUpdate struct {
-	Name                        *string                          `json:"name,omitempty"`
-	VerificationLevel           *GuildVerificationLevel          `json:"verification_level,omitempty"`
-	DefaultMessageNotifications *GuildDefaultNotifications       `json:"default_message_notifications,omitempty"`
-	ExplicitContentFilter       *GuildExplicitContentFilter      `json:"explicit_content_filter,omitempty"`
-	AFKChannelID                *nullable.Nullable[snowflake.ID] `json:"afk_channel_id,omitempty"`
-	AFKTimeout                  *uint32                          `json:"afk_timeout,omitempty"`
-	Icon                        *nullable.Nullable[string]       `json:"icon,omitempty"`
-	OwnerID                     *snowflake.ID                    `json:"owner_id,omitempty"`
-	Splash                      *nullable.Nullable[string]       `json:"splash,omitempty"`
-	DiscoverySplash             *nullable.Nullable[string]       `json:"discovery_splash,omitempty"`
-	Banner                      *nullable.Nullable[string]       `json:"banner,omitempty"`
-	SystemChannelID             *nullable.Nullable[snowflake.ID] `json:"system_channel_id,omitempty"`
-	SystemChannelFlags          *SystemChannelFlag               `json:"system_channel_flags,omitempty"`
-	RulesChannelID              *snowflake.ID                    `json:"rules_channel_id,omitempty"`
-	PublicUpdatesChannelID      *snowflake.ID                    `json:"public_updates_channel_id,omitempty"`
-	PreferredLocale             *string                          `json:"preferred_locale,omitempty"`
-	Description                 *string                          `json:"description,omitempty"`
-	PremiumProgressBarEnabled   *bool                            `json:"premium_progress_bar_enabled,omitempty"`
-}
-
-type SystemChannelFlag uint8
-
-const (
-	ChannelFlagDisableMemberJoin SystemChannelFlag = 1 << iota
-	ChannelFlagDisableBoost
-	ChannelFlagDisableSetupTips
-	ChannelFlagDisableReplyButton
-)
-
-type GuildSticker struct {
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	Tags        string       `json:"tags"`
-	User        User         `json:"user"`
-	ID          snowflake.ID `json:"id"`
-	GuildID     snowflake.ID `json:"guild_id"`
-	PackID      snowflake.ID `json:"pack_id"`
-	SortValue   int          `json:"sort_value"`
-	Available   bool         `json:"available"`
-}
-
-// StageInstance
-//
-// Reference: https://discord.com/developers/docs/resources/stage-instance#stage-instance-object-stage-instance-structure
-type StageInstance struct {
-	Topic                string       `json:"topic"`
-	ID                   snowflake.ID `json:"id"`
-	GuildID              snowflake.ID `json:"guild_id"`
-	ChannelID            snowflake.ID `json:"channel_id"`
-	PrivacyLevel         int          `json:"privacy_level"`
-	DiscoverableDisabled bool         `json:"discoverable_disabled"`
+	return
 }
 
 type GuildNSFWLevel uint8
 
 const (
-	GuildNSFWDefault GuildNSFWLevel = iota
-	GuildNSFWExplicit
-	GuildNSFWSafe
-	GuildNSFWAgeRestricted
+	GuildNSFWLevelDefault GuildNSFWLevel = iota
+	GuildNSFWLevelExplicit
+	GuildNSFWLevelSafe
+	GuildNSFWLevelAgeRestricted
 )
+
+type GuildWelcomeScreen struct {
+	Description     string                 `json:"description,omitempty"`
+	WelcomeChannels []WelcomeScreenChannel `json:"welcome_channels,omitempty"`
+}
+
+type WelcomeScreenChannel struct {
+	ChannelID   snowflake.ID `json:"channel_id,omitempty"`
+	EmojiID     snowflake.ID `json:"emoji_id,omitempty"`
+	EmojiName   string       `json:"emoji_name,omitempty"`
+	Description string       `json:"description,omitempty"`
+}
 
 type GuildPremiumTier uint8
 
 const (
-	GuildPremiumNone GuildPremiumTier = iota
-	GuildPremiumTier1
-	GuildPremiumTier2
-	GuildPremiumTier3
+	ServerBoostTierNone GuildPremiumTier = iota
+	ServerBoostTierTier1
+	ServerBoostTierTier2
+	ServerBoostTierTier3
 )
 
+type GuildSystemChannelFlag uint8
+type GuildMFALevel uint8
 type GuildExplicitContentFilter uint8
-
-const (
-	GuildExplicitContentFilterDisabled GuildExplicitContentFilter = iota
-	GuildExplicitContentFilterWithoutRoles
-	GuildExplicitContentFilterAll
-)
-
-type GuildDefaultNotifications uint8
-
-const (
-	GuildDefaultNotificationsAll GuildDefaultNotifications = iota
-	GuildDefaultNotificationsMentions
-)
-
+type GuildMessageNotificationLevel uint8
 type GuildVerificationLevel uint8
 
 const (
-	GuildVerificationNone GuildVerificationLevel = iota
-	GuildVerificationLow
-	GuildVerificationMedium
-	GuildVerificationHigh
-	GuildVerificationVeryHigh
+	GuildSystemChannelFlagSuppressJoinNotifications GuildSystemChannelFlag = 1 << iota
+	GuildSystemChannelFlagSuppressPremiumSubscriptions
+	GuildSystemChannelFlagSuppressGuildReminderNotifications
+	GuildSystemChannelFlagSuppressJoinNotificationReplies
+	GuildSystemChannelFlagSuppressRoleSubscriptionPurchaseNotifications
+	GuildSystemChannelFlagSuppressRoleSubscriptionPurchaseNotificationReplies
 )
-
-// GuildScheduledEvent
-//
-// Reference: https://discord.com/developers/docs/resources/guild-scheduled-event#guild-scheduled-event-object-guild-scheduled-event-structure
-type GuildScheduledEvent struct {
-	ScheduledStartTime timeconv.Timestamp   `json:"scheduled_start_time"`
-	ScheduledEndTime   timeconv.Timestamp   `json:"scheduled_end_time"`
-	EntityMetadata     ScheduledEventMeta   `json:"entity_metadata"`
-	Name               string               `json:"name"`
-	Description        string               `json:"description"`
-	Creator            User                 `json:"creator"`
-	ID                 snowflake.ID         `json:"id"`
-	CreatorID          snowflake.ID         `json:"creator_id"`
-	PrivacyLevel       int                  `json:"privacy_level"`
-	ChannelID          snowflake.ID         `json:"channel_id"`
-	GuildID            snowflake.ID         `json:"guild_id"`
-	EntityID           snowflake.ID         `json:"entity_id"`
-	UserCount          int                  `json:"user_count"`
-	EntityType         ScheduledEventType   `json:"entity_type"`
-	Status             ScheduledEventStatus `json:"status"`
-}
-
-type ScheduledEventMeta struct {
-	Location string `json:"location"`
-}
-
-type ScheduledEventType uint8
+const (
+	GuildMFALevelNone GuildMFALevel = iota
+	GuildMFALevelElevated
+)
+const (
+	GuildExplicitContentFilterNone GuildExplicitContentFilter = iota
+	GuildExplicitContentFilterMembersWithoutRoles
+	GuildExplicitContentFilterAllMembers
+)
 
 const (
-	ScheduledEventStage ScheduledEventType = iota + 1
-	ScheduledEventVoice
-	ScheduledEventExternal
+	MessageNotificationLevelAllMessages GuildMessageNotificationLevel = iota
+	MessageNotificationLevelOnlyMentions
 )
-
-type ScheduledEventStatus uint8
 
 const (
-	ScheduledEventStatusScheduled ScheduledEventStatus = iota + 1
-	ScheduledEventStatusActive
-	ScheduledEventStatusCompleted
-	ScheduledEventStatusCanceled
+	GuildVerificationLevelNone GuildVerificationLevel = iota
+	GuildVerificationLevelLow
+	GuildVerificationLevelMedium
+	GuildVerificationLevelHigh
+	GuildVerificationLevelVeryHigh
 )
-
-type Ban struct {
-	Reason string `json:"reason"`
-	User   User   `json:"user"`
-}

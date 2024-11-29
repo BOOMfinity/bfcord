@@ -4,34 +4,34 @@ import (
 	"github.com/andersfylling/snowflake/v5"
 )
 
-type MessageReaction struct {
-	Emoji     Emoji        `json:"emoji"`
-	ChannelID snowflake.ID `json:"-"`
-	MessageID snowflake.ID `json:"-"`
-	Count     int          `json:"count"`
-	Me        bool         `json:"me"`
+type Reaction struct {
+	Count        uint                 `json:"count,omitempty"`
+	CountDetails ReactionCountDetails `json:"count_details"`
+	Me           bool                 `json:"me,omitempty"`
+	MeBurst      bool                 `json:"me_burst,omitempty"`
+	Emoji        Emoji                `json:"emoji,omitempty"`
+	BurstColors  []string             `json:"burst_colors,omitempty"`
 }
 
-func (v MessageReaction) API(api ClientQuery) MessageReactionQuery {
-	return v.Message(api).Reaction(v.Emoji.ToString())
+type ReactionCountDetails struct {
+	Burst  uint `json:"burst,omitempty"`
+	Normal uint `json:"normal,omitempty"`
 }
 
-func (v MessageReaction) RemoveOwn(api ClientQuery) error {
-	return v.API(api).RemoveOwn()
+type Emoji struct {
+	ID            snowflake.ID   `json:"id,omitempty"`
+	Name          string         `json:"name,omitempty"`
+	Roles         []snowflake.ID `json:"roles,omitempty"`
+	User          User           `json:"user,omitempty"`
+	RequireColons bool           `json:"require_colons,omitempty"`
+	Managed       bool           `json:"managed,omitempty"`
+	Animated      bool           `json:"animated,omitempty"`
+	Available     bool           `json:"available,omitempty"`
 }
 
-func (v MessageReaction) Remove(api ClientQuery, userID snowflake.ID) error {
-	return v.API(api).Remove(userID)
-}
+type ReactionType uint
 
-func (v MessageReaction) Channel(api ClientQuery) ChannelQuery {
-	return api.Channel(v.ChannelID)
-}
-
-func (v MessageReaction) Message(api ClientQuery) MessageQuery {
-	return api.Channel(v.ChannelID).Message(v.MessageID)
-}
-
-func (v MessageReaction) Users(api ClientQuery, limit uint64) ([]User, error) {
-	return v.API(api).All(limit)
-}
+const (
+	ReactionNormal ReactionType = iota
+	ReactionBurst
+)

@@ -1,41 +1,28 @@
 package discord
 
 import (
-	"github.com/BOOMfinity/bfcord/api/images"
 	"github.com/andersfylling/snowflake/v5"
 )
 
 type Webhook struct {
-	Avatar        string       `json:"avatar"`
-	Token         string       `json:"token"`
-	Name          string       `json:"name"`
-	Url           string       `json:"url"`
-	User          User         `json:"user"`
-	SourceChannel Channel      `json:"source_channel"`
-	SourceGuild   Guild        `json:"source_guild"`
-	GuildID       snowflake.ID `json:"guild_id"`
-	ID            snowflake.ID `json:"id"`
-	Type          int          `json:"type"`
-	ApplicationID snowflake.ID `json:"application_id"`
-	ChannelID     snowflake.ID `json:"channel_id"`
+	ID            snowflake.ID `json:"id,omitempty"`
+	Token         string       `json:"token,omitempty"`
+	Type          WebhookType  `json:"type,omitempty"`
+	GuildID       snowflake.ID `json:"guild_id,omitempty"`
+	ChannelID     snowflake.ID `json:"channel_id,omitempty"`
+	User          User         `json:"user,omitempty"`
+	Name          string       `json:"name,omitempty"`
+	Avatar        string       `json:"avatar,omitempty"`
+	ApplicationID snowflake.ID `json:"application_id,omitempty"`
+	SourceGuild   Guild        `json:"source_guild,omitempty"`
+	SourceChannel Channel      `json:"source_channel,omitempty"`
+	Url           string       `json:"url,omitempty"`
 }
 
-type WebhookType uint8
+type WebhookType uint
 
 const (
-	WebhookIncoming WebhookType = iota + 1
-	WebhookChannelFollower
-	WebhookApplication
+	WebhookTypeIncoming WebhookType = iota + 1
+	WebhookTypeChannelFollower
+	WebhookTypeApplication
 )
-
-type WebhookExecute struct {
-	MessageCreate
-	Username  *string `json:"username,omitempty"`
-	AvatarURL *string `json:"avatar_url,omitempty"`
-}
-
-type WebhookCreate struct {
-	Name   string        `json:"name"`
-	Avatar *images.Image `json:"avatar,omitempty"`
-	Reason string        `json:"-"`
-}

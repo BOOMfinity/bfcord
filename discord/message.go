@@ -1,292 +1,150 @@
 package discord
 
 import (
-	"io"
-
-	"github.com/BOOMfinity/bfcord/discord/components"
-	"github.com/BOOMfinity/bfcord/internal/timeconv"
 	"github.com/andersfylling/snowflake/v5"
+
+	"github.com/BOOMfinity/bfcord/utils"
 )
 
-// Message
-//
-// Reference: https://discord.com/developers/docs/resources/channel#message-object
 type Message struct {
-	Reactions ReactionStore `json:"reactions"`
-	Member    Member        `json:"member"`
-	Author    User          `json:"author"`
-	BaseMessage
+	ID                  snowflake.ID                               `json:"id,omitempty"`
+	ChannelID           snowflake.ID                               `json:"channel_id,omitempty"`
+	Author              User                                       `json:"author,omitempty"`
+	Content             string                                     `json:"content,omitempty"`
+	Timestamp           Timestamp                                  `json:"timestamp"`
+	EditedTimestamp     Timestamp                                  `json:"edited_timestamp"`
+	TTS                 bool                                       `json:"tts,omitempty"`
+	MentionEveryone     bool                                       `json:"mention_everyone,omitempty"`
+	Mentions            []User                                     `json:"mentions,omitempty"`
+	MentionRoles        []snowflake.ID                             `json:"mention_roles,omitempty"`
+	MentionChannels     []MessageChannelMention                    `json:"mention_channels,omitempty"`
+	Attachments         []Attachment                               `json:"attachments,omitempty"`
+	Embeds              []MessageEmbed                             `json:"embeds,omitempty"`
+	Reactions           []Reaction                                 `json:"reactions,omitempty"`
+	Nonce               string                                     `json:"nonce,omitempty"`
+	Pinned              bool                                       `json:"pinned,omitempty"`
+	WebhookID           snowflake.ID                               `json:"webhook_id,omitempty"`
+	Type                MessageType                                `json:"type,omitempty"`
+	Activity            utils.Nullable[MessageActivity]            `json:"activity,omitempty"`
+	Application         utils.Nullable[Application]                `json:"application,omitempty"`
+	ApplicationID       snowflake.ID                               `json:"application_id,omitempty"`
+	MessageReference    utils.Nullable[MessageReference]           `json:"message_reference,omitempty"`
+	Flags               MessageFlag                                `json:"flags,omitempty"`
+	InteractionMetadata utils.Nullable[MessageInteractionMetadata] `json:"interaction_metadata,omitempty"`
+	Thread              utils.Nullable[Channel]                    `json:"thread,omitempty"`
+	Components          ActionRows                                 `json:"components,omitempty"`
+	Position            int                                        `json:"position,omitempty"`
+	Resolved            ResolvedData                               `json:"resolved,omitempty"`
+	Poll                utils.Nullable[Poll]                       `json:"poll,omitempty"`
 }
 
-func (v *Message) Fetch(api ClientQuery) error {
-	msg, err := v.fetch(api)
-	if err != nil {
-		return err
-	}
-	v.fetchPatch(*msg)
-	v.Reactions = msg.Reactions
-	v.Member = msg.Member
-	v.Author = msg.Author
-	return nil
+type MessageChannelMention struct {
+	ID      snowflake.ID `json:"id,omitempty"`
+	GuildID snowflake.ID `json:"guild_id,omitempty"`
+	Type    ChannelType  `json:"type,omitempty"`
+	Name    string       `json:"name,omitempty"`
 }
 
-func (v *Message) Patch() {
-	v.BaseMessage.AuthorID = v.Author.ID
-	for i := range v.Reactions {
-		v.Reactions[i].MessageID = v.ID
-		v.Reactions[i].ChannelID = v.ChannelID
-		v.Reactions[i].Emoji.GuildID = v.GuildID
-	}
-	v.Member.UserID = v.Author.ID
-	v.Member.GuildID = v.GuildID
+type MessageInteractionMetadata struct {
+	ID                            snowflake.ID                `json:"id,omitempty"`
+	Type                          InteractionType             `json:"type,omitempty"`
+	User                          User                        `json:"user"`
+	OriginalResponseMessageID     snowflake.ID                `json:"original_response_message_id,omitempty"`
+	InteractedMessageID           snowflake.ID                `json:"interacted_message_id,omitempty"`
+	TriggeringInteractionMetadata *MessageInteractionMetadata `json:"triggering_interaction_metadata,omitempty"`
+	// AuthorizingIntegrationOwners []ApplicationIntegrationType
 }
 
-type BaseMessage struct {
-	EditedTimestamp timeconv.Timestamp      `json:"edited_timestamp"`
-	Timestamp       timeconv.Timestamp      `json:"timestamp"`
-	Reference       *MessageReference       `json:"message_reference"`
-	Activity        MessageActivity         `json:"activity"`
-	Nonce           string                  `json:"nonce"`
-	Content         string                  `json:"content"`
-	Attachments     []Attachment            `json:"attachments"`
-	Components      []components.Component  `json:"components"`
-	Embeds          []MessageEmbed          `json:"embeds"`
-	Mentions        []User                  `json:"mentions"`
-	MentionRoles    []snowflake.ID          `json:"mention_roles"`
-	MentionChannels []MessageChannelMention `json:"mention_channels"`
-	Interaction     MessageInteraction      `json:"interaction"`
-	ApplicationID   snowflake.ID            `json:"application_id"`
-	GuildID         snowflake.ID            `json:"guild_id"`
-	ChannelID       snowflake.ID            `json:"channel_id"`
-	WebhookID       snowflake.ID            `json:"webhook_id"`
-	AuthorID        snowflake.ID            `json:"author_id"`
-	ID              snowflake.ID            `json:"id"`
-	Type            MessageType             `json:"type"`
-	MentionEveryone bool                    `json:"mention_everyone"`
-	TTS             bool                    `json:"tts"`
-	Pinned          bool                    `json:"pinned"`
-}
+type MessageFlag = BitField
 
-type MessageInteraction struct {
-	Name string       `json:"name"`
-	User User         `json:"user"`
-	ID   snowflake.ID `json:"id"`
-	Type uint8        `json:"type"`
-}
+const (
+	MessageFlagCrossPosted                      MessageFlag = 1 << 0
+	MessageFlagIsCrossPost                      MessageFlag = 1 << 1
+	MessageFlagSuppressEmbeds                   MessageFlag = 1 << 2
+	MessageFlagSourceMessageDeleted             MessageFlag = 1 << 3
+	MessageFlagUrgent                           MessageFlag = 1 << 4
+	MessageFlagHasThread                        MessageFlag = 1 << 5
+	MessageFlagEphemeral                        MessageFlag = 1 << 6
+	MessageFlagFailedToMentionSomeRolesInThread MessageFlag = 1 << 7
+	MessageFlagSuppressNotifications            MessageFlag = 1 << 12
+	MessageFlagIsVoiceMessage                   MessageFlag = 1 << 13
+)
 
-func (v BaseMessage) fetch(api ClientQuery) (*Message, error) {
-	// TODO: Ignore cache
-	return api.Channel(v.ChannelID).Message(v.ID).Get()
-}
-
-func (v *BaseMessage) fetchPatch(msg Message) {
-	v.Content = msg.Content
-	v.Type = msg.Type
-	v.Embeds = msg.Embeds
-	v.Attachments = msg.Attachments
-	v.Pinned = msg.Pinned
-}
-
-func (v BaseMessage) Fetch(api ClientQuery) error {
-	msg, err := v.fetch(api)
-	if err != nil {
-		return err
-	}
-	v.fetchPatch(*msg)
-	return nil
-}
-
-func (v BaseMessage) IsGuild() bool {
-	return v.GuildID.Valid()
-}
-
-func (v BaseMessage) API(client ClientQuery) MessageQuery {
-	return client.Channel(v.ChannelID).Message(v.ID)
-}
-
-func (v BaseMessage) Guild(client ClientQuery) GuildQuery {
-	return client.Guild(v.GuildID)
-}
-
-func (v BaseMessage) Author(client ClientQuery) UserQuery {
-	return client.User(v.AuthorID)
-}
-
-func (v BaseMessage) Member(client ClientQuery) GuildMemberQuery {
-	return client.Guild(v.GuildID).Member(v.AuthorID)
-}
-
-func (v BaseMessage) Edit(client ClientQuery) MessageBuilder {
-	return client.Channel(v.ChannelID).Message(v.ID).Edit()
-}
-
-func (v BaseMessage) Channel(client ClientQuery) ChannelQuery {
-	return client.Channel(v.ChannelID)
-}
-
-func (v BaseMessage) Reply(client ClientQuery, ref bool) CreateMessageBuilder {
-	bl := v.Channel(client).SendMessage()
-	if ref {
-		bl.Reference(MessageReference{
-			MessageID: v.ID,
-			ChannelID: v.ChannelID,
-			GuildID:   v.GuildID,
-		})
-	}
-	return bl
+type MessageReference struct {
+	ChannelID       snowflake.ID `json:"channel_id,omitempty"`
+	GuildID         snowflake.ID `json:"guild_id,omitempty"`
+	MessageID       snowflake.ID `json:"message_id,omitempty"`
+	FailIfNotExists bool         `json:"fail_if_not_exists"`
 }
 
 type MessageActivity struct {
-	PartyID string              `json:"party_id"`
-	Type    MessageActivityType `json:"type"`
+	PartyID string              `json:"party_id,omitempty"`
+	Type    MessageActivityType `json:"type,omitempty"`
 }
 
 type MessageActivityType uint8
 
 const (
-	MessageActivityJoin MessageActivityType = iota + 1
-	MessageActivitySpectate
-	MessageActivityListen
-	MessageActivityJoinRequest
+	MessageActivityTypeJoin MessageActivityType = iota + 1
+	MessageActivityTypeSpectate
+	MessageActivityTypeListen
+	MessageActivityTypeJoinRequest MessageActivityType = iota + 2
 )
 
 type MessageType uint8
 
 const (
-	MessageTypeDefault MessageType = iota
-	MessageTypeRecipientAdd
-	MessageTypeRecipientRemove
-	MessageTypeCall
-	MessageTypeChannelNameChange
-	MessageTypeChannelIconChange
-	MessageTypeChannelPinnedMessage
-	MessageTypeGuildMemberJoin
-	MessageTypeGuildSubscription
-	MessageTypeGuildSubscriptionTier1
-	MessageTypeGuildSubscriptionTier2
-	MessageTypeGuildSubscriptionTier3
-	MessageTypeChannelFollowAdd
-	MessageTypeDiscoveryDisqualified
-	MessageTypeDiscoveryReQualified
-	MessageTypeDiscoveryInitialWarning
-	MessageTypeDiscoveryFinalWarning
-	MessageTypeThreadCreated
-	MessageTypeReply
-	MessageTypeChatInputCommand
-	MessageTypeThreadStarterMessage
-	MessageTypeGuildInviteReminder
-	MessageTypeContextMenuCommand
+	MessageTypeDefault                                 MessageType = 0
+	MessageTypeRecipientAdd                            MessageType = 1
+	MessageTypeRecipientRemove                         MessageType = 2
+	MessageTypeCall                                    MessageType = 3
+	MessageTypeChannelNameChange                       MessageType = 4
+	MessageTypeChannelIconChange                       MessageType = 5
+	MessageTypeChannelPinnedMessage                    MessageType = 6
+	MessageTypeGuildMemberJoin                         MessageType = 7
+	MessageTypeUserPremiumGuildSubscription            MessageType = 8
+	MessageTypeUserPremiumGuildSubscriptionTier1       MessageType = 9
+	MessageTypeUserPremiumGuildSubscriptionTier2       MessageType = 10
+	MessageTypeUserPremiumGuildSubscriptionTier3       MessageType = 11
+	MessageTypeChannelFollowAdd                        MessageType = 12
+	MessageTypeGuildDiscoveryDisqualified              MessageType = 14
+	MessageTypeGuildDiscoveryReQualified               MessageType = 15
+	MessageTypeGuildDiscoveryGracePeriodInitialWarning MessageType = 16
+	MessageTypeGuildDiscoveryGracePeriodFinalWarning   MessageType = 17
+	MessageTypeThreadCreated                           MessageType = 18
+	MessageTypeReply                                   MessageType = 19
+	MessageTypeChatInputCommand                        MessageType = 20
+	MessageTypeThreadStarterMessage                    MessageType = 21
+	MessageTypeGuildInviteReminder                     MessageType = 22
+	MessageTypeContextMenuCommand                      MessageType = 23
+	MessageTypeAutoModerationAction                    MessageType = 24
+	MessageTypeRoleSubscriptionPurchase                MessageType = 25
+	MessageTypeInteractionPremiumUpsell                MessageType = 26
+	MessageTypeStageStart                              MessageType = 27
+	MessageTypeStageEnd                                MessageType = 28
+	MessageTypeStageSpeaker                            MessageType = 29
+	MessageTypeStageTopic                              MessageType = 31
+	MessageTypeGuildApplicationPremiumSubscription     MessageType = 32
 )
 
-// MessageEmbed
-//
-// Reference: https://discord.com/developers/docs/resources/channel#embed-object
-type MessageEmbed struct {
-	Timestamp   *timeconv.Timestamp `json:"timestamp,omitempty"`
-	Author      *EmbedAuthor        `json:"author,omitempty"`
-	Footer      *EmbedFooter        `json:"footer,omitempty"`
-	Provider    *EmbedProvider      `json:"provider,omitempty"`
-	Type        EmbedType           `json:"type,omitempty"`
-	Description string              `json:"description,omitempty"`
-	Url         string              `json:"url,omitempty"`
-	Title       string              `json:"title,omitempty"`
-	Fields      []EmbedField        `json:"fields,omitempty"`
-	Thumbnail   *EmbedMedia         `json:"thumbnail,omitempty"`
-	Video       *EmbedMedia         `json:"video,omitempty"`
-	Image       *EmbedMedia         `json:"image,omitempty"`
-	Color       int64               `json:"color,omitempty"`
+type Attachment struct {
+	ID           snowflake.ID   `json:"id,omitempty"`
+	FileName     string         `json:"file_name,omitempty"`
+	Description  string         `json:"description,omitempty"`
+	ContentType  string         `json:"content_type,omitempty"`
+	Size         uint           `json:"size,omitempty"`
+	Url          string         `json:"url,omitempty"`
+	ProxyUrl     string         `json:"proxy_url,omitempty"`
+	Height       uint           `json:"height,omitempty"`
+	Width        uint           `json:"width,omitempty"`
+	Ephemeral    bool           `json:"ephemeral,omitempty"`
+	DurationSecs float64        `json:"duration_secs,omitempty"`
+	Waveform     string         `json:"waveform,omitempty"`
+	Flags        AttachmentFlag `json:"flags,omitempty"`
 }
 
-type EmbedFooter struct {
-	Text         string `json:"text"`
-	IconUrl      string `json:"icon_url,omitempty"`
-	ProxyIconUrl string `json:"proxy_icon_url,omitempty"`
-}
-
-type EmbedMedia struct {
-	Url      string `json:"url,omitempty"`
-	ProxyUrl string `json:"proxy_url,omitempty"`
-	Height   int    `json:"height,omitempty"`
-	Width    int    `json:"width,omitempty"`
-}
-
-type EmbedProvider struct {
-	Name string `json:"name"`
-	Url  string `json:"url"`
-}
-
-type EmbedAuthor struct {
-	Name         string `json:"name"`
-	Url          string `json:"url,omitempty"`
-	IconUrl      string `json:"icon_url,omitempty"`
-	ProxyIconUrl string `json:"proxy_icon_url,omitempty"`
-}
-
-type EmbedField struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Inline bool   `json:"inline"`
-}
-
-type EmbedType string
+type AttachmentFlag uint8
 
 const (
-	EmbedTypeRich    EmbedType = "rich"
-	EmbedTypeImage   EmbedType = "image"
-	EmbedTypeVideo   EmbedType = "video"
-	EmbedTypeGif     EmbedType = "gifv"
-	EmbedTypeArticle EmbedType = "article"
-	EmbedTypeLink    EmbedType = "link"
+	AttachmentFlagRemix AttachmentFlag = 1 << 2
 )
-
-type MessageChannelMention struct {
-	Name    string       `json:"name"`
-	ID      snowflake.ID `json:"id"`
-	GuildID snowflake.ID `json:"guild_id"`
-	Type    ChannelType  `json:"type"`
-}
-
-type MessageReference struct {
-	MessageID snowflake.ID `json:"message_id"`
-	ChannelID snowflake.ID `json:"channel_id,omitempty"`
-	GuildID   snowflake.ID `json:"guild_id,omitempty"`
-}
-
-type MessageCreate struct {
-	Content          *string                 `json:"content,omitempty"`
-	TTS              *bool                   `json:"tts,omitempty"`
-	MessageReference *MessageReference       `json:"message_reference,omitempty"`
-	Embeds           *[]MessageEmbed         `json:"embeds,omitempty"`
-	Files            *[]MessageFile          `json:"-"`
-	Attachments      *[]Attachment           `json:"attachments,omitempty"`
-	Components       *[]components.Component `json:"components,omitempty"`
-	AllowedMentions  *MessageAllowedMentions `json:"allowed_mentions,omitempty"`
-}
-
-// MessageAllowedMentions
-//
-// Reference: https://discord.com/developers/docs/resources/channel#allowed-mentions-object-allowed-mentions-structure
-type MessageAllowedMentions struct {
-	// Supported values: roles, users, everyone
-	Parse       []string       `json:"parse"`
-	Roles       []snowflake.ID `json:"roles,omitempty"`
-	Users       []snowflake.ID `json:"users,omitempty"`
-	RepliedUser bool           `json:"replied_user,omitempty"`
-}
-
-type ForumMessageCreate struct {
-	Message             MessageCreate          `json:"message"`
-	Name                *string                `json:"name,omitempty"`
-	AutoArchiveDuration *ThreadArchiveDuration `json:"auto_archive_duration,omitempty"`
-	RateLimitPerUser    uint32                 `json:"rate_limit_per_user,omitempty"`
-	AppliedTags         []snowflake.ID         `json:"applied_tags,omitempty"`
-}
-
-type MessageFile struct {
-	Reader      io.Reader `json:"-"`
-	Name        string    `json:"-"`
-	Description string    `json:"-"`
-	Url         string    `json:"-"`
-	Ephemeral   bool      `json:"-"`
-	Base64      bool      `json:"-"`
-}

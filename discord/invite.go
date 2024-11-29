@@ -1,33 +1,33 @@
 package discord
 
-import "github.com/BOOMfinity/bfcord/internal/timeconv"
-
-type InviteWithMeta struct {
-	CreatedAt timeconv.Timestamp `json:"created_at,omitempty"`
-	Invite
-	Uses      uint32 `json:"uses,omitempty"`
-	MaxUses   uint32 `json:"max_uses,omitempty"`
-	MaxAge    uint32 `json:"max_age,omitempty"`
-	Temporary bool   `json:"temporary,omitempty"`
-}
+import "github.com/BOOMfinity/go-utils/nullable"
 
 type Invite struct {
-	ExpiresAt           timeconv.Timestamp   `json:"expires_at,omitempty"`
-	Guild               *Guild               `json:"guild,omitempty"`
-	Inviter             *User                `json:"inviter,omitempty"`
-	GuildScheduledEvent *GuildScheduledEvent `json:"guild_scheduled_event,omitempty"`
-	TargetUser          *User                `json:"target_user,omitempty"`
-	Channel             *Channel             `json:"channel,omitempty"`
-	StageInstance       *StageInstance       `json:"stage_instance,omitempty"`
-	Code                string               `json:"code,omitempty"`
-	PresenceCount       uint32               `json:"approximate_presence_count,omitempty"`
-	MemberCount         uint32               `json:"approximate_member_count,omitempty"`
-	TargetType          InviteTargetType     `json:"target_type,omitempty"`
+	InviteType               InviteType                        `json:"type,omitempty"`
+	Code                     string                            `json:"code,omitempty"`
+	Guild                    Guild                             `json:"guild"`
+	Channel                  Channel                           `json:"channel"`
+	Inviter                  User                              `json:"inviter"`
+	TargetType               InviteTargetType                  `json:"target_type,omitempty"`
+	TargetUser               User                              `json:"target_user"`
+	TargetApplication        Application                       `json:"target_application"`
+	ApproximatePresenceCount int                               `json:"approximate_presence_count,omitempty"`
+	ApproximateMemberCount   int                               `json:"approximate_member_count,omitempty"`
+	ExpiresAt                nullable.Nullable[Timestamp]      `json:"expires_at"`
+	GuildScheduledEvent      nullable.Nullable[ScheduledEvent] `json:"guild_scheduled_event"`
 }
 
-type InviteTargetType uint8
+type InviteType uint
 
 const (
-	TargetTypeStream InviteTargetType = iota + 1
-	TargetTypeEmbeddedApplication
+	InviteGuild InviteType = iota
+	InviteGroupDM
+	InviteFriend
+)
+
+type InviteTargetType uint
+
+const (
+	InviteTargetStream InviteTargetType = iota + 1
+	InviteTargetEmbeddedApplication
 )

@@ -1,249 +1,187 @@
-// Low-Level Discord API requests
-
 package api
 
 import (
-	"bytes"
-	"context"
-	"fmt"
-	"github.com/BOOMfinity/bfcord/errs"
-	"reflect"
-	"sync"
-	"time"
-
-	"github.com/BOOMfinity/bfcord/api/limits"
 	"github.com/BOOMfinity/bfcord/discord"
-	"github.com/BOOMfinity/golog"
 	"github.com/andersfylling/snowflake/v5"
-	"github.com/segmentio/encoding/json"
-	"github.com/valyala/fasthttp"
 )
 
-var contentJson = []byte("application/json")
-var discordPrefix = []byte("https://discord.com/api/")
-
-var requestDataPool = sync.Pool{
-	New: func() interface{} {
-		return &RequestData{}
-	},
+type GuildClient interface {
+	UpdateChannelPositions(positions []GuildChannelPosition, reason ...string) error
+	UpdateRolePositions(positions []GuildRolePosition, reason ...string) error
+	CreateChannel(params GuildChannelParams, reason ...string) (discord.Channel, error)
+	Get() (discord.Guild, error)
+	Modify(params ModifyGuildParams, reason ...string) (discord.Guild, error)
+	Delete(reason ...string) error
+	Channels() ([]discord.Channel, error)
+	ActiveThreads() ([]discord.Channel, error)
+	Member(id snowflake.ID) MemberClient
+	Members(params GuildMembersParams) ([]discord.Member, error)
+	Search(query string, limit ...uint) ([]discord.Member, error)
+	ModifyCurrentMember(nick string, reason ...string) (discord.Member, error)
+	BulkBan(ids []snowflake.ID, seconds uint, reason ...string) (GuildBanAddResponse, error)
+	Roles() ([]discord.Role, error)
+	Role(id snowflake.ID) RoleClient
+	CreateRole(params CreateRoleParams, reason ...string) (discord.Role, error)
+	CurrentUserVoiceState() (discord.VoiceState, error)
+	ModifyCurrentUserVoiceState(params ModifyCurrentUserVoiceStateParams) (discord.VoiceState, error)
+	Emojis() ([]discord.Emoji, error)
+	Emoji(id snowflake.ID) EmojiClient
+	CreateEmoji(params CreateEmojiParams, reason ...string) (discord.Emoji, error)
+	Events() ([]discord.ScheduledEvent, error)
+	CreateEvent(params CreateScheduledEventParams, reason ...string) (discord.ScheduledEvent, error)
+	Event(id snowflake.ID) GuildEventClient
 }
 
-type Client struct {
-	manager      *limits.Manager
-	logger       golog.Logger
-	token        string
-	staticHeader []byte
-	retryDelay   time.Duration
-	timeout      time.Duration
-	maxRetries   uint8
+type ChannelClient interface {
+	JoinThread() error
+	AddThreadMember(id snowflake.ID) error
+	LeaveThread() error
+	RemoveThreadMember(id snowflake.ID) error
+	ThreadMember(id snowflake.ID, withMember bool) (discord.ThreadMember, error)
+	AddRecipient(id snowflake.ID, userToken, userNickname string) error
+	RemoveRecipient(id snowflake.ID) error
+	Modify(params ModifyChannelParams, reason ...string) (discord.Channel, error)
+	StartThread(data StartThreadWithoutMessageParams, reason ...string) (discord.Channel, error)
+	StartForumMediaThread(data StartForumOrMediaThreadParams, reason ...string) (discord.Channel, error)
+	UpdateChannelPermissions(id snowflake.ID, data UpdateChannelPermissionsParams, reason ...string) error
+	DeleteChannelPermission(id snowflake.ID, reason ...string) error
+	FollowAnnouncementChannel(webhook snowflake.ID, reason ...string) (discord.FollowedChannel, error)
+	Pins() ([]discord.Message, error)
+	Invites() ([]discord.Invite, error)
+	CreateInvite(data CreateChannelInviteParams, reason ...string) (discord.Invite, error)
+	Delete(reason ...string) error
+	Webhooks() ([]discord.Webhook, error)
+	CreateWebhook(params CreateWebhookParams, reason ...string) (discord.Webhook, error)
+	Get() (dst discord.Channel, err error)
+	SendMessage(params CreateMessageParams) (discord.Message, error)
+	Messages() MessagesQuery
+	Message(id snowflake.ID) MessageClient
+	BulkDelete(messages []snowflake.ID, reason ...string) error
 }
 
-func (v *Client) Webhook(id snowflake.ID, token string) discord.WebhookQuery {
-	return webhookQuery{api: v, id: id, token: token}
+type EmojiClient interface {
+	Get() (discord.Emoji, error)
+	Modify(params ModifyEmojiParams, reason ...string) (discord.Emoji, error)
+	Delete(reason ...string) error
 }
 
-func (v *Client) Channel(id snowflake.ID) discord.ChannelQuery {
-	return NewChannelQuery(v, id)
+type GuildEventClient interface {
+	Get(withUserCount bool) (discord.ScheduledEvent, error)
+	Modify(params ModifyScheduledEventParams, reason ...string) (discord.ScheduledEvent, error)
+	Delete(reason ...string) error
+	Users() GuildEventQuery
 }
 
-func (v *Client) LowLevel() discord.LowLevelClientQuery {
-	d := &lowLevelQuery{client: v}
-	d.emptyOptions = emptyOptions[discord.LowLevelClientQuery]{data: d}
-	return d
+type GuildEventQuery interface {
+	Before(id snowflake.ID, withMember bool, limit uint) ([]ScheduledEventUser, error)
+	After(id snowflake.ID, withMember bool, limit uint) ([]ScheduledEventUser, error)
+	Latest(withMember bool, limit uint) ([]ScheduledEventUser, error)
 }
 
-func (v *Client) Log() golog.Logger {
-	return v.logger
+type InteractionClient interface {
+	Pong() error
+	Response() InteractionResponseClient
+	Update(params EditMessageParams) error
+	DeferredUpdate() error
+	DeferredComponentUpdate() error
+	Reply(params InteractionMessageParams) error
+	SendFollowUp(params FollowUpParams) (discord.Message, error)
+	FollowUp(id snowflake.ID) FollowUpClient
+	AutoComplete(choices []discord.CommandChoice) error
+	TextInput(params TextInputParams) error
 }
 
-func (v *Client) acquireRequestData() *RequestData {
-	data := requestDataPool.Get().(*RequestData)
-	data.timeout = v.timeout
-	data.retries = v.maxRetries
-	data.retryDelay = v.retryDelay
-	return data
+type FollowUpClient interface {
+	Get() (discord.Message, error)
+	Update(params EditMessageParams) (discord.Message, error)
+	Delete() error
 }
 
-func (v *Client) New(auth bool) *fasthttp.Request {
-	req := fasthttp.AcquireRequest()
-	req.Header.AddBytesV(fasthttp.HeaderContentType, contentJson)
-	if auth && len(v.staticHeader) > 0 {
-		req.Header.AddBytesV(fasthttp.HeaderAuthorization, v.staticHeader)
-	}
-	return req
+type InteractionResponseClient interface {
+	Get() (discord.Message, error)
+	Delete() error
+	Edit(params EditMessageParams) (discord.Message, error)
 }
 
-func (v *Client) DoNoResp(req *fasthttp.Request, options ...Option) error {
-	res, err := v.Do(req, options...)
-	if res != nil {
-		fasthttp.ReleaseResponse(res)
-	}
-	return err
+type MemberClient interface {
+	Get() (discord.MemberWithUser, error)
+	Modify(params ModifyGuildMemberParams, reason ...string) (discord.Member, error)
+	AddRole(id snowflake.ID, reason ...string) error
+	RemoveRole(id snowflake.ID, reason ...string) error
+	Kick(reason ...string) error
+	CreateBan(seconds uint, reason ...string) error
+	RemoveBan(reason ...string) error
+	VoiceState() (discord.VoiceState, error)
+	ModifyVoiceState(params ModifyUserVoiceStateParams) (discord.VoiceState, error)
 }
 
-func (v *Client) DoResult(req *fasthttp.Request, result any, options ...Option) error {
-	if reflect.ValueOf(result).Kind() != reflect.Ptr {
-		return errs.ResultMustBePointer
-	}
-	res, err := v.Do(req, options...)
-	if err != nil {
-		return err
-	}
-	defer fasthttp.ReleaseResponse(res)
-	err = json.Unmarshal(res.Body(), &result)
-	if err != nil {
-		return err
-	}
-	return nil
+type MessageClient interface {
+	Answer(id uint, params MessagePollVotersParams) ([]discord.User, error)
+	EndPoll() (discord.Message, error)
+	Reaction(emoji string) ReactionClient
+	StartThread(data StartThreadParams, reason ...string) (discord.Channel, error)
+	Get() (dst discord.Message, _ error)
+	Delete(reason ...string) error
+	Pin(reason ...string) error
+	Unpin(reason ...string) error
+	Update(params EditMessageParams) (discord.Message, error)
+	CrossPost() error
+	DeleteAllReactions() error
 }
 
-func (v *Client) DoBytes(req *fasthttp.Request, options ...Option) ([]byte, error) {
-	res, err := v.Do(req, options...)
-	if err != nil {
-		return nil, err
-	}
-	defer fasthttp.ReleaseResponse(res)
-	return res.Body(), nil
+type MessagesQuery interface {
+	Latest(limit uint) ([]discord.Message, error)
+	Before(id snowflake.ID, limit uint) ([]discord.Message, error)
+	After(id snowflake.ID, limit uint) ([]discord.Message, error)
+	Around(id snowflake.ID, limit uint) ([]discord.Message, error)
 }
 
-func (v *Client) Do(req *fasthttp.Request, options ...Option) (*fasthttp.Response, error) {
-	defer fasthttp.ReleaseRequest(req)
-	data := v.acquireRequestData()
-	defer requestDataPool.Put(data)
-	for i := range options {
-		options[i](data)
-	}
-	res := fasthttp.AcquireResponse()
-	for i := 0; i < int(data.retries+1); i++ {
-		if i > 0 {
-			time.Sleep(data.retryDelay)
-		}
-		if bytes.HasPrefix(req.URI().FullURI(), discordPrefix) {
-			ctx, cancel := context.WithTimeout(context.Background(), v.timeout)
-			err := v.manager.Wait(ctx, string(req.URI().FullURI()))
-			if err != nil {
-				cancel()
-				return nil, err
-			}
-			cancel()
-		}
-		_time := time.Now()
-		err := fasthttp.DoTimeout(req, res, data.timeout)
-		if err != nil {
-			return nil, err
-		}
-		if res.StatusCode() < 400 {
-			v.logger.Debug().Any(string(req.Header.Method())+" "+string(req.URI().Path())).Any(time.Since(_time)).Send("Response body: %vB", len(res.Body()))
-		}
-		if (res.StatusCode() >= 400 && res.StatusCode() < 500) && !bytes.HasPrefix(req.URI().FullURI(), discordPrefix) {
-			v.logger.Warn().Any(string(req.Header.Method())+" "+string(req.URI().Path())).Any(time.Since(_time)).Send("Received status %v with %vB of body size", res.StatusCode(), len(res.Body()))
-		}
-		if res.StatusCode() >= 500 {
-			v.logger.Error().Any(string(req.Header.Method()) + " " + string(req.URI().Path())).Any(time.Since(_time)).Send("Internal server error :(")
-			continue
-		}
-		if bytes.HasPrefix(req.URI().FullURI(), discordPrefix) {
-			err = v.manager.ParseRequest(req, res)
-			if err != nil {
-				return nil, err
-			}
-			if res.StatusCode() == fasthttp.StatusTooManyRequests {
-				v.logger.Debug().Any(string(req.Header.Method()) + " " + string(req.URI().Path())).Any(time.Since(_time)).Send("Just got rate limited :(")
-				data.retries--
-				continue
-			}
-			if res.StatusCode() >= 400 && json.Valid(res.Body()) {
-				switch res.StatusCode() {
-				case 401:
-					err = errs.HTTPUnauthorized
-				case 404:
-					err = errs.HTTPNotFound
-				default:
-					dcErr := new(errs.DiscordError)
-					err = json.Unmarshal(res.Body(), &dcErr)
-					if err != nil {
-						return nil, fmt.Errorf("failed to parse discord error: %w", err)
-					}
-					err = dcErr
-				}
-				v.logger.Warn().Any(string(req.Header.Method()) + " " + string(req.URI().Path())).Any(time.Since(_time)).Send(err.Error())
-				return nil, err
-			}
-		}
-		return res, nil
-	}
-	return nil, errs.TooManyRetries
+type ReactionClient interface {
+	Reactions(opts MessageReactionsParams) (_ []discord.User, err error)
+	React() error
+	DeleteOwn() error
+	Delete(user snowflake.ID) error
+	DeleteAll() error
 }
 
-func (v *Client) User(id snowflake.ID) discord.UserQuery {
-	return NewUserQuery(v, id)
+type RoleClient interface {
+	Get() (discord.Role, error)
+	Modify(params CreateRoleParams, reason ...string) (discord.Role, error)
+	Delete(reason ...string) error
 }
 
-func (v *Client) Guild(id snowflake.ID) discord.GuildQuery {
-	return NewGuildQuery(v, id)
+type SlashClient interface {
+	Command(id snowflake.ID) SlashCommandClient
+	Guild(id snowflake.ID) GuildSlashCommandClient
+	List() ([]discord.Command, error)
+	Create(params discord.CreateCommand) (discord.Command, error)
+	Bulk(cmds []discord.CreateCommand) ([]discord.Command, error)
 }
 
-func (v *Client) CurrentUser() (user *discord.User, err error) {
-	req := v.New(true)
-	req.SetRequestURI(fmt.Sprintf("%v/users/@me", FullApiUrl))
-	err = v.DoResult(req, &user)
-	return
+type SlashCommandClient interface {
+	Get() (discord.Command, error)
+	Delete() error
+	Modify(params discord.CreateCommand) (discord.Command, error)
+	ModifyPermissions(params discord.CommandPermissions) (discord.CommandPermissions, error)
+	Permissions() (discord.CommandPermissions, error)
 }
 
-func (v *Client) GatewayURL() (url string, err error) {
-	gateway := struct {
-		Url string `json:"url"`
-	}{}
-	req := v.New(false)
-	req.SetRequestURI(FullApiUrl + "/gateway")
-	err = v.DoResult(req, &gateway)
-	url = gateway.Url
-	return
+type GuildSlashCommandClient interface {
+	PermissionList() ([]discord.CommandPermissions, error)
+	List() ([]discord.Command, error)
+	Create(params discord.CreateCommand) (discord.Command, error)
+	Bulk(cmds []discord.CreateCommand) ([]discord.Command, error)
+	Command(id snowflake.ID) SlashCommandClient
 }
 
-type SessionInfo struct {
-	Url    string `json:"url"`
-	Shards uint16 `json:"shards"`
-	Limits struct {
-		Total          int `json:"total"`
-		Remaining      int `json:"remaining"`
-		ResetAfter     int `json:"reset_after"`
-		MaxConcurrency int `json:"max_concurrency"`
-	} `json:"session_start_limit"`
+type StageClient interface {
+	Get() (discord.StageInstance, error)
+	Create(params CreateStageInstanceParams, reason ...string) (discord.StageInstance, error)
+	Modify(params ModifyStageInstanceParams, reason ...string) (discord.StageInstance, error)
+	Delete(reason ...string) error
 }
 
-func (v *Client) SessionData() (data SessionInfo, err error) {
-	req := v.New(true)
-	req.SetRequestURI(FullApiUrl + "/gateway/bot")
-	err = v.DoResult(req, &data, WithRetryDelay(10*time.Second))
-	return
-}
-
-func NewClient(token string, options ...Option) *Client {
-	def := &RequestData{
-		timeout:          10 * time.Second,
-		retryDelay:       5 * time.Second,
-		retries:          3,
-		prefix:           FullApiUrl,
-		authHeaderPrefix: "Bot",
-	}
-	for i := range options {
-		options[i](def)
-	}
-	if def.logger == nil {
-		def.logger = golog.NewWithLevel("api", golog.LevelWarn)
-	}
-	var header []byte
-	if token != "" {
-		header = append([]byte(fmt.Sprintf("%v ", def.authHeaderPrefix)), token...)
-	}
-	return &Client{
-		logger:       def.logger,
-		token:        token,
-		retryDelay:   def.retryDelay,
-		timeout:      def.timeout,
-		maxRetries:   def.retries,
-		staticHeader: header,
-		manager:      limits.NewManager(def.prefix),
-	}
+type UserClient interface {
+	Get() (u discord.User, _ error)
+	CreateDM(recipient snowflake.ID) (discord.Channel, error)
 }
