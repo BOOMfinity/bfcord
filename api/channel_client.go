@@ -155,8 +155,9 @@ func (c ChannelResolver) Delete(reason ...string) error {
 }
 
 func (c ChannelResolver) Webhooks() ([]discord.Webhook, error) {
-	//TODO implement me
-	panic("implement me")
+	return httpc.NewJSONRequest[[]discord.Webhook](c.client.http, func(b httpc.RequestBuilder) error {
+		return b.Execute("channels", c.ID.String(), "webhooks")
+	})
 }
 
 func (c ChannelResolver) CreateWebhook(params CreateWebhookParams, reason ...string) (discord.Webhook, error) {
