@@ -43,11 +43,11 @@ type MessageFile struct {
 
 type EditMessageParams struct {
 	Content         *string                `json:"content,omitempty"`
-	Embeds          []discord.MessageEmbed `json:"embeds,omitempty"`
+	Embeds          []discord.MessageEmbed `json:"embeds"`
 	Flags           *discord.MessageFlag   `json:"flags,omitempty"`
 	AllowedMentions *AllowedMentions       `json:"allowed_mentions,omitempty"`
-	Components      discord.ActionRows     `json:"components,omitempty"`
-	Attachments     []MessageFile          `json:"attachments,omitempty"`
+	Components      discord.ActionRows     `json:"components"`
+	Attachments     []MessageFile          `json:"attachments"`
 }
 
 type CreateMessageParams struct {
